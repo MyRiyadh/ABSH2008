@@ -1,0 +1,1213 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MYRIYADH | Riyadh Cafes & Restaurants | Ultimate Guide 2025</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0077cc;
+      --accent: #f1c40f;
+      --bg-light: #f9f9f9;
+      --bg-table: #f3f3f3;
+      --cafe-bg: #e3f7fa;
+      --cafe-border: #22b6c7;
+      --restaurant-bg: #fff3e6;
+      --restaurant-border: #ff9800;
+      --event-bg: #f3e6ff;
+      --event-border: #a259e6;
+      --card-shadow: 0 4px 16px rgba(0,0,0,0.07);
+      --filter-bg: #fff;
+      --filter-border: #f1c40f;
+      --filter-active: #0077cc22;
+      --filter-hover: #f1c40f22;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Manrope', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background-color: var(--bg-light);
+      color: #222;
+      line-height: 1.6;
+      letter-spacing: 0.01em;
+      font-size: 1.06em;
+    }
+    header {
+      background: linear-gradient(90deg, #000, #222 90%);
+      color: white;
+      padding: 2.5rem 1rem 2rem 1rem;
+      text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,.21);
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    .user-name {
+      position: absolute;
+      top: 1.3rem;
+      left: 2.2rem;
+      font-size: 1.13rem;
+      color: #ffe066;
+      background: #222c;
+      padding: 0.38em 1.2em 0.38em 1.2em;
+      border-radius: 8px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      z-index: 2;
+      box-shadow: 0 2px 9px #2221;
+    }
+    .logo-myr {
+      font-size: 2.7rem;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      color: #fff;
+      background: linear-gradient(90deg, #0095ff 60%, #f1c40f 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+      vertical-align: middle;
+      font-family: 'Manrope', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-shadow: 0 3px 16px #0077cc33;
+      margin-bottom: 0.18em;
+    }
+    .logo-sub {
+      font-size: 1.1rem;
+      color: #ffe066;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      margin-top: -6px;
+      margin-bottom: 0.2em;
+    }
+    header p {
+      color: #f1c40f;
+      font-weight: 600;
+      margin: 0;
+      font-size: 1.15em;
+      letter-spacing: 1.5px;
+    }
+    nav {
+      background-color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.1rem 0;
+      gap: 2.5rem;
+      border-bottom: 2px solid #eee;
+      margin-bottom: 0.6rem;
+      position: sticky;
+      top: 0;
+      z-index: 99;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.12rem;
+      transition: color 0.23s;
+      padding: .1em .5em;
+      border-radius: 4px;
+    }
+    nav a:focus, nav a:hover {
+      color: var(--accent);
+      background: #222;
+      outline: none;
+    }
+    .container {
+      max-width: 1080px;
+      margin: 2.5rem auto 1.5rem auto;
+      padding: 0 1.5rem;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.1rem 2.3rem;
+      justify-content: center;
+      margin-bottom: 2.8rem;
+      background: var(--filter-bg);
+      border-radius: 16px;
+      box-shadow: 0 4px 28px 0 rgba(0,0,0,.11);
+      border: 2px solid var(--filter-border);
+      padding: 1.7rem 1.4rem 1.35rem 1.4rem;
+      position: relative;
+      z-index: 10;
+      align-items: flex-end;
+      animation: filtersPop .7s;
+    }
+    @keyframes filtersPop {
+      0% { transform: scale(.96) translateY(25px); opacity: 0.5;}
+      100% { transform: scale(1) translateY(0); opacity: 1;}
+    }
+    .filters .filter-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 140px;
+      margin-bottom: 0.2em;
+      position: relative;
+    }
+    .filters .filter-label {
+      font-size: 1.06em;
+      font-weight: 700;
+      color: #222;
+      margin-bottom: 0.38em;
+      letter-spacing: .1em;
+      padding-left: 2px;
+      text-shadow: 0 1px 0 #fffbe7;
+      user-select: none;
+    }
+    .filters select, .filters input[type="text"] {
+      padding: 0.78rem 2.1rem 0.78rem 0.8rem;
+      border-radius: 9px;
+      border: 2px solid #e0e0e0;
+      background-color: #fff;
+      font-size: 1.09em;
+      min-width: 142px;
+      max-width: 210px;
+      transition: border-color 0.24s, box-shadow 0.27s;
+      font-family: inherit;
+      box-shadow: 0 2px 8px rgba(241,196,15,0.08);
+      outline: none;
+      margin-bottom: 2px;
+    }
+    .filters select:focus, .filters input[type="text"]:focus,
+    .filters select:hover, .filters input[type="text"]:hover {
+      border-color: var(--primary);
+      background: var(--filter-active);
+      box-shadow: 0 2px 16px rgba(0,119,204,0.09);
+    }
+    .filters .clear-btn {
+      position: absolute;
+      right: 1.2rem; top: 1.4rem;
+      background: #f1c40f;
+      color: #fff;
+      font-size: 1.08em;
+      border: none;
+      border-radius: 7px;
+      padding: 0.41em 1.11em;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 1px 10px rgba(241,196,15,0.09);
+      transition: background 0.18s;
+      z-index: 5;
+      letter-spacing: 1px;
+    }
+    .filters .clear-btn:hover {
+      background: #f39c12;
+    }
+    .filters .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .7em;
+      margin-top: 1.1em;
+      width: 100%;
+      justify-content: flex-start;
+      min-height: 32px;
+      padding-left: 3px;
+    }
+    .filters .chip {
+      display: inline-flex;
+      align-items: center;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 12px;
+      font-size: 0.97em;
+      padding: 0.22em 0.95em 0.22em 0.7em;
+      font-weight: 600;
+      box-shadow: 0 2px 7px rgba(0,119,204,.09);
+      cursor: pointer;
+      transition: background 0.18s;
+      position: relative;
+      gap: 0.5em;
+      letter-spacing: 0.02em;
+      border: 1.5px solid #fff;
+      margin-bottom: 2px;
+    }
+    .filters .chip span {
+      font-size: 1.12em;
+      margin-left: 0.15em;
+      color: #ffeaa7;
+      cursor: pointer;
+      font-weight: bold;
+      padding-left: 2px;
+      margin-right: -2px;
+      transition: color 0.19s;
+    }
+    .filters .chip:hover {
+      background: var(--accent);
+      color: #222;
+    }
+    .filters .chip:hover span {
+      color: #c0392b;
+    }
+    .filters .apply-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 1.13em;
+      font-weight: 700;
+      margin-left: 1.8rem;
+      margin-right: 0.5rem;
+      padding: 0.86em 2.2em;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,119,204,0.07);
+      transition: background 0.18s, box-shadow 0.16s;
+      letter-spacing: 1.2px;
+      margin-top: 0.4em;
+    }
+    .filters .apply-btn:hover, .filters .apply-btn:focus {
+      background: #005fa3;
+      box-shadow: 0 3px 18px rgba(0,119,204,0.15);
+    }
+    @media (max-width: 960px) {
+      .filters { gap: 1.1rem 1.1rem; }
+      .filters .filter-block { min-width: 112px; }
+      .filters .apply-btn { margin-left: 0.6rem; }
+    }
+    @media (max-width: 700px) {
+      .filters, .container { padding: 1rem !important; }
+      .filters { flex-direction: column; gap: 1.1rem 0.4rem;}
+      .filters .filter-block { width: 100%; }
+      .filters .filter-chips {margin-bottom: 0.8em;}
+      .filters .clear-btn { top: auto; bottom: 0.8rem; right: 0.9rem; }
+      .filters .apply-btn { width: 100%; margin: 1.2em 0 0 0;}
+    }
+    .search-bar {
+      width: 100%;
+      max-width: 600px;
+      margin: 0.2rem auto 1.8rem auto;
+      display: flex;
+      justify-content: center;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 8px 0 0 8px;
+      font-size: 1rem;
+      margin-right: 0;
+      border-right: none;
+      font-family: inherit;
+    }
+    .search-bar button {
+      padding: 0.8rem 1.5rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0 8px 8px 0;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .search-bar button:hover {
+      background-color: #005fa3;
+    }
+    .section-title {
+      text-align: center;
+      margin: 3rem 0 2rem;
+      color: #222;
+      font-size: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .section-cafes {
+      background: var(--cafe-bg);
+      border-left: 7px solid var(--cafe-border);
+      border-radius: 18px;
+      margin-bottom: 2.3em;
+      box-shadow: 0 2px 14px #22b6c722;
+      padding: 1.7em 1.5em 1.2em 1.5em;
+    }
+    .section-cafes .section-title { color: #22b6c7; }
+    .section-restaurants {
+      background: var(--restaurant-bg);
+      border-left: 7px solid var(--restaurant-border);
+      border-radius: 18px;
+      margin-bottom: 2.3em;
+      box-shadow: 0 2px 14px #ff980022;
+      padding: 1.7em 1.5em 1.2em 1.5em;
+    }
+    .section-restaurants .section-title { color: #ff9800; }
+    .section-events {
+      background: var(--event-bg);
+      border-left: 7px solid var(--event-border);
+      border-radius: 18px;
+      margin-bottom: 2.3em;
+      box-shadow: 0 2px 14px #a259e633;
+      padding: 1.7em 1.5em 1.2em 1.5em;
+    }
+    .section-events .section-title { color: #a259e6; }
+    .list-view {
+      display: flex;
+      flex-direction: column;
+      gap: 2.8rem;
+    }
+    .list-item {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: var(--card-shadow);
+      padding: 2.1rem 2.1rem 1.8rem 2.1rem;
+      margin-bottom: 0.4rem;
+      border-left: 6px solid var(--primary);
+      transition: box-shadow 0.18s, border-left 0.16s;
+      position: relative;
+    }
+    .section-cafes .list-item { border-left: 6px solid var(--cafe-border); }
+    .section-restaurants .list-item { border-left: 6px solid var(--restaurant-border); }
+    .section-events .list-item { border-left: 6px solid var(--event-border); }
+    .list-item .tag {
+      position: absolute;
+      right: 1.4rem; top: 1.3rem;
+      background: var(--accent);
+      color: #fff;
+      font-weight: bold;
+      font-size: 0.97em;
+      border-radius: 6px;
+      padding: 0.22em 0.9em;
+      letter-spacing: 1px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.04);
+    }
+    .list-item:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,.15);
+    }
+    .list-item h3 {
+      font-size: 1.6rem;
+      margin: 0 0 0.6rem 0;
+      color: var(--primary);
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .section-cafes .list-item h3 { color: #22b6c7; }
+    .section-restaurants .list-item h3 { color: #ff9800; }
+    .section-events .list-item h3 { color: #a259e6; }
+    .overview-table {
+      width: 100%;
+      margin: 1.1rem 0 0.7rem 0;
+      border-collapse: collapse;
+      background: #f8fafd;
+      box-shadow: 0 1px 3px rgba(0,0,0,.03);
+      border-radius: 10px;
+      overflow: hidden;
+      font-size: 1.04em;
+    }
+    .overview-table th, .overview-table td {
+      padding: 0.7em 0.6em;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    .overview-table th {
+      background-color: var(--bg-table);
+      color: #333;
+      font-weight: bold;
+    }
+    .overview-table tr:last-child td {
+      border-bottom: none;
+    }
+    .location {
+      margin-top: 0.7em;
+      font-size: 1.04em;
+      color: #666;
+    }
+    .help-block {
+      background: #fffbe7;
+      border-left: 4px solid var(--accent);
+      padding: 1em;
+      margin: 1.5em 0 2.2em 0;
+      border-radius: 8px;
+      color: #665c00;
+      font-size: 1.08em;
+      font-style: italic;
+      text-align: center;
+    }
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 0.19rem;
+      font-size: 1.07em;
+      margin-bottom: 0.6rem;
+      margin-top: 0.2rem;
+    }
+    .star {
+      color: gold;
+      font-size: 1.22em;
+      cursor: pointer;
+      transition: color 0.18s;
+    }
+    .star.inactive {
+      color: #ccc;
+    }
+    .review-list {
+      padding-left: 1.5rem;
+      margin: 0.6rem 0 0 0;
+      font-size: 0.99em;
+      color: #444;
+    }
+    .review-list li {
+      margin-bottom: 0.12em;
+      margin-left: 0;
+      list-style: disc;
+    }
+    .countdown {
+      font-weight: bold;
+      color: #e74c3c;
+      font-size: 1.08rem;
+      margin-top: 0.6em;
+      margin-bottom: 0.3em;
+      letter-spacing: 1px;
+    }
+    .buttons {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .buttons a {
+      padding: 0.52rem 1.07rem;
+      text-decoration: none;
+      color: white;
+      background-color: var(--primary);
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background-color 0.24s;
+      font-size: 1em;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    }
+    .buttons a:hover {
+      background-color: #005fa3;
+    }
+    .map {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 2.3rem;
+      overflow: hidden;
+      margin-bottom: 2.3rem;
+      background: #f3f3f3;
+    }
+    #mapid {
+      width: 100%;
+      height: 400px;
+    }
+    .list-item.highlight {
+      box-shadow: 0 0 0 3px var(--accent), 0 8px 32px rgba(0,0,0,.19);
+      z-index: 3;
+      transition: box-shadow 0.24s;
+    }
+    .hidden {
+      display: none !important;
+    }
+    footer {
+      background-color: #222;
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: 2rem;
+      font-size: 0.94rem;
+    }
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: bold;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="user-name">Abdulrahman Alharbi</span>
+    <span class="logo-myr">MYRIYADH</span><br>
+    <span class="logo-sub">Cafes • Restaurants • Events</span>
+    <p>Ultimate Guide 2025 – Cafés, Restaurants, Events & More</p>
+  </header>
+  <nav>
+    <a href="#cafes-section">☕ Cafes</a>
+    <a href="#restaurants-section">🍝 Restaurants</a>
+    <a href="#events-section">🎉 Events</a>
+    <a href="#map">📍 Map</a>
+    <a href="#filters">🔍 Filters</a>
+  </nav>
+  <div class="container">
+
+    <div class="help-block" id="list-view">
+      <b>List View:</b> The most detailed and interactive guide to Riyadh’s best cafés, restaurants, and events.<br>
+      Each entry below comes with its own overview, reviews, ratings, links, and more.<br>
+      <span style="color:var(--primary)">Need help with reservations, tickets, or suggestions? Just ask!</span>
+    </div>
+
+    <form class="search-bar" onsubmit="event.preventDefault();">
+      <input type="text" id="search-input" placeholder="Search: e.g. Italian Restaurants, Okawa Cafe, Expo...">
+      <button id="search-btn" type="button" onclick="applyFilters()">Search</button>
+    </form>
+    <div class="filters" id="filters">
+      <button type="button" class="clear-btn" onclick="clearAllFilters()" title="Clear all filters">Clear All ✖</button>
+      <div class="filter-block">
+        <label class="filter-label" for="filter-neighborhood">Neighborhood</label>
+        <select id="filter-neighborhood">
+          <option value="">All Neighborhoods</option>
+          <option value="An Narjis">An Narjis</option>
+          <option value="Al Olaya">Al Olaya</option>
+          <option value="Al Wadi">Al Wadi</option>
+          <option value="An Nafal">An Nafal</option>
+          <option value="Hittin">Hittin</option>
+          <option value="As Sulimaniyah">As Sulimaniyah</option>
+          <option value="Al Safarat">Al Safarat</option>
+          <option value="Al Faisaliah">Al Faisaliah</option>
+          <option value="Al Malqa">Al Malqa</option>
+          <option value="Al Mohammadiyah">Al Mohammadiyah</option>
+          <option value="Al Yasmin">Al Yasmin</option>
+          <option value="Al Nakheel">Al Nakheel</option>
+          <option value="Al Mursalat">Al Mursalat</option>
+          <option value="Al Murabba">Al Murabba</option>
+        </select>
+      </div>
+      <div class="filter-block">
+        <label class="filter-label" for="filter-type">Type</label>
+        <select id="filter-type">
+          <option value="">All Types</option>
+          <option value="cafe">Cafe</option>
+          <option value="restaurant">Restaurant</option>
+          <option value="event">Event</option>
+        </select>
+      </div>
+      <div class="filter-block">
+        <label class="filter-label" for="filter-price">Price</label>
+        <select id="filter-price">
+          <option value="">All Prices</option>
+          <option value="$">$</option>
+          <option value="$$">$$</option>
+          <option value="$$$">$$$</option>
+        </select>
+      </div>
+      <div class="filter-block">
+        <label class="filter-label" for="filter-rating">Rating</label>
+        <select id="filter-rating">
+          <option value="">All Ratings</option>
+          <option value="4.5">4.5+</option>
+          <option value="4">4.0+</option>
+          <option value="3">3.0+</option>
+        </select>
+      </div>
+      <div class="filter-block">
+        <label class="filter-label" for="filter-cuisine">Cuisine</label>
+        <select id="filter-cuisine">
+          <option value="">All</option>
+          <option value="Italian">Italian</option>
+          <option value="International">International</option>
+          <option value="Steakhouse">Steakhouse</option>
+          <option value="French">French</option>
+          <option value="Cafe">Cafe</option>
+          <option value="Specialty Coffee">Specialty Coffee</option>
+        </select>
+      </div>
+      <div class="filter-block">
+        <label class="filter-label" for="filter-coffee">Coffee Type</label>
+        <select id="filter-coffee">
+          <option value="">All</option>
+          <option value="Specialty">Specialty</option>
+          <option value="Trendy">Trendy</option>
+          <option value="Modern">Modern</option>
+          <option value="Desserts">Desserts</option>
+        </select>
+      </div>
+      <div class="filter-block">
+        <label class="filter-label" for="filter-event-category">Event Category</label>
+        <select id="filter-event-category">
+          <option value="">All Categories</option>
+          <option value="Food">Food</option>
+          <option value="Lifestyle">Lifestyle</option>
+          <option value="Sports">Sports</option>
+          <option value="Expo">Expo</option>
+        </select>
+      </div>
+      <button type="button" class="apply-btn" onclick="applyFilters()">Apply Filters</button>
+      <div class="filter-chips" id="filter-chips"></div>
+    </div>
+
+    <!-- CAFES SECTION -->
+    <section class="section-cafes" id="cafes-section">
+      <h2 class="section-title">☕ Cafes</h2>
+      <div class="list-view" id="cafes-list">
+        <div class="list-item" data-type="cafe" data-neighborhood="An Narjis" data-price="$$" data-rating="4.3" data-cuisine="Japanese-style café" data-coffee="Specialty" data-name="Ōkawa" data-coords="24.8341,46.7225">
+          <h3>Ōkawa</h3><span class="tag">Cafe</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Japanese-style café</td></tr>
+            <tr><th>Google Rating</th><td>4.3/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>50–100</td></tr>
+            <tr><th>Notes</th><td>Known for fluffy Japanese pancakes and matcha drinks. Cozy interior; parking may be limited.</td></tr>
+            <tr><th>Contact</th><td>0502519311</td></tr>
+
+          </table>
+          <div class="rating" data-rating="4.3"></div>
+          <div class="buttons">
+            <a href="https://www.okawa.com/contact" target="_blank">Contact</a>
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b> An Narjis, Riyadh 11331 &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.8341, 46.7225</span>
+            <a href="https://maps.app.goo.gl/9KQARkAERvwSakUp9" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+        <div class="list-item" data-type="cafe" data-neighborhood="Al Olaya" data-price="$$" data-rating="4.7" data-cuisine="Specialty coffee & pastries" data-coffee="Desserts" data-name="Chérie" data-coords="24.6897,46.6873">
+          <h3>Chérie</h3><span class="tag">Cafe</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Specialty coffee & pastries</td></tr>
+            <tr><th>Google Rating</th><td>4.7/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>50–100</td></tr>
+            <tr><th>Notes</th><td>Offers Spanish lattes, tiramisu, and cheesecake. Cozy atmosphere with outdoor seating.</td></tr>
+            <tr><th>Contact</th><td>https://www.instagram.com/cherie.sa1/?hl=en</td></tr>
+          </table>
+          <div class="rating" data-rating="4.7"></div>
+          <div class="buttons">
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b> Olaya St, Al Olaya, Riyadh 11461 &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.6897, 46.6873</span>
+            <a href="https://www.google.com/maps/search/?api=1&query=24.6897,46.6873" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+        <div class="list-item" data-type="cafe" data-neighborhood="Al Wadi" data-price="$$" data-rating="4.5" data-cuisine="Specialty coffee & desserts" data-coffee="Modern" data-name="Alf" data-coords="24.7899,46.7658">
+          <h3>Alf</h3><span class="tag">Cafe</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Specialty coffee & desserts</td></tr>
+            <tr><th>Google Rating</th><td>4.5/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>50–100</td></tr>
+            <tr><th>Notes</th><td>Features a minimalist, Instagrammable interior with a water feature. Offers specialty coffee and desserts.</td></tr>
+            <tr><th>Contact</th><td>0545249936</td></tr>
+          </table>
+          <div class="rating" data-rating="4.5"></div>
+          <div class="buttons">
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b> 3789 Wadi As Sarh, Al Wadi, 6572, Riyadh 13313 &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.7899, 46.7658</span>
+            <a href="https://maps.app.goo.gl/JUgoWvXQGrbqfhC98" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+        <div class="list-item" data-type="cafe" data-neighborhood="An Nafal" data-price="$$" data-rating="4.6" data-cuisine="Specialty coffee" data-coffee="Trendy" data-name="BTW" data-coords="24.7743,46.7121">
+          <h3>BTW</h3><span class="tag">Cafe</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Specialty coffee</td></tr>
+            <tr><th>Google Rating</th><td>4.6/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>50–100</td></tr>
+            <tr><th>Notes</th><td>Limited information available; presumed to be a local specialty café.</td></tr>
+            <tr><th>Contact</th><td>https://www.instagram.com/btw.sa/</td></tr>
+
+
+          </table>
+          <div class="rating" data-rating="4.6"></div>
+          <div class="buttons">
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b> 4454 North Ring , An Nafal, 6853, Riyadh 13312 &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.7743, 46.7121</span>
+            <a href="https://maps.app.goo.gl/Q78xhBm3rjCV3EVC6" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+        <div class="list-item" data-type="cafe" data-neighborhood="Hittin" data-price="$$" data-rating="4.4" data-cuisine="Specialty coffee" data-coffee="Specialty" data-name="Belong" data-coords="24.8244,46.6311">
+          <h3>Belong</h3><span class="tag">Cafe</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Specialty coffee</td></tr>
+            <tr><th>Google Rating</th><td>4.4/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>50–100</td></tr>
+            <tr><th>Notes</th><td>Offers a variety of drinks in a cozy setting.</td></tr>
+            <tr><th>Contact</th><td>0551900902</td></tr>
+
+          </table>
+          <div class="rating" data-rating="4.4"></div>
+          <div class="buttons">
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b> Wadi Al Amariyah, Hittin, Riyadh 12571 &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.8244, 46.6311</span>
+            <a href="https://maps.app.goo.gl/twYPgn8xTNAzh1sP8" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+        <div class="list-item" data-type="cafe" data-neighborhood="Al Yasmin" data-price="$$" data-rating="4.5" data-cuisine="Specialty coffee" data-coffee="Specialty" data-name="Crops" data-coords="24.8111,46.6753">
+          <h3>Crops</h3><span class="tag">Cafe</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Specialty coffee</td></tr>
+            <tr><th>Google Rating</th><td>4.5/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>50–100</td></tr>
+            <tr><th>Notes</th><td>Great place to work or study; offers specialty coffee and a comfortable environment.</td></tr>
+            <tr><th>Contact</th><td>0544801080</td></tr>
+          </table>
+          <div class="rating" data-rating="4.4"></div>
+          <div class="buttons">
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b>  3160 , An Narjis, Riyadh 12475 &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.8111, 46.6753</span>
+            <a href="https://maps.app.goo.gl/XW2Ck9xVSYcgods78" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- RESTAURANTS SECTION -->
+    <section class="section-restaurants" id="restaurants-section">
+      <h2 class="section-title">🍝 Restaurants</h2>
+      <div class="list-view" id="restaurants-list">
+        <div class="list-item" data-type="restaurant" data-neighborhood="As Sulimaniyah" data-price="$$$" data-rating="4.0" data-cuisine="Italian fine dining" data-name="Signor Sassi" data-coords="24.7000,46.6900">
+          <h3>Signor Sassi</h3><span class="tag">Restaurant</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Italian fine dining</td></tr>
+            <tr><th>Google Rating</th><td>4.0/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>200–300</td></tr>
+            <tr><th>Notes</th><td>Offers a luxurious dining experience with authentic Italian cuisine.</td></tr>
+            <tr><th>Contact</th><td>920011877</td></tr>
+          </table>
+          <div class="rating" data-rating="4.0"></div>
+          <a href="https://signorsassi.redro.menu/en/restaurant/riyadh/food.html" target="_blank">View Menu</a>
+          <div class="buttons">
+            <a href="https://widget.servmeco.com/?oid=1233&source=venue_website" target="_blank">Reserve</a>
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b> 2605 Prince Abdulaziz Ibn Musaid Ibn Jalawi St, As Sulimaniyah, Riyadh 12234 &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.7000, 46.6900</span>
+            <a href="https://maps.app.goo.gl/qwkxQTxeF5U5tUpT8" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+        <div class="list-item" data-type="restaurant" data-neighborhood="As Sulimaniyah" data-price="$$" data-rating="4.5" data-cuisine="Contemporary cuisine" data-name="Public" data-coords="24.7010,46.6910">
+          
+            <h3>Public</h3><span class="tag">Restaurant</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Contemporary cuisine</td></tr>
+            <tr><th>Google Rating</th><td>4.5/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>150–250</td></tr>
+            <tr><th>Notes</th><td>Offers modern dishes in a stylish setting.</td></tr>
+            <tr><th>Contact</th><td>920024788</td></tr>
+            </table>
+          <div class="rating" data-rating="4.5"></div>
+          <a href="https://thepublicrestaurant.com/wp-content/uploads/2025/02/Public-Menu.pdf" target="_blank">View Menu</a>
+          <div class="buttons">
+            <a href="https://web.thechefz.co/reservation/web/create/17011689" target="_blank">Reserve</a>
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b> RHSA8182، 8182 Prince Abdulaziz Ibn Musaid Ibn Jalawi St, As Sulimaniyah, 4040, Riyadh 12223 &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.7010, 46.6910</span>
+            <a href="https://maps.app.goo.gl/d4rPe2J5d54eB55M8" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+        <div class="list-item" data-type="restaurant" data-neighborhood="As Sulimaniyah" data-price="$$$" data-rating="3.8" data-cuisine="Steakhouse" data-name="Beefbar" data-coords="24.7020,46.6920">
+        
+            <h3>Beefbar</h3><span class="tag">Restaurant</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Steakhouse</td></tr>
+            <tr><th>Google Rating</th><td>3.8/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>150–300</td></tr>
+            <tr><th>Notes</th><td>Monaco-based steakhouse known for premium wagyu, crab tacos, and Art Deco ambiance.</td></tr>
+            <tr><th>Contact</th><td>920004146</td></tr>
+
+          </table>
+          <div class="rating" data-rating="3.8"></div>
+          <a href="https://beefbar.com/riyadh-menus/dinner/" target="_blank">View Menu</a>
+          <div class="buttons">
+            <a href="https://widget.servmeco.com/?oid=1222&source=venue_website" target="_blank">Reserve</a>
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b> 8712 Prince Abdulaziz Ibn Musaid Ibn Jalawi St، 4237،, Riyadh 12223 &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.7020, 46.6920</span>
+            <a href="https://maps.app.goo.gl/Pqp2kDkSedTonc3V7" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+        <div class="list-item" data-type="restaurant" data-neighborhood="Al Faisaliah" data-price="$$$" data-rating="3.7" data-cuisine="Swiss steakhouse" data-name="Entrecôte Café de Paris" data-coords="24.7136,46.6753">
+          <h3>Entrecôte Café de Paris</h3><span class="tag">Restaurant</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Swiss steakhouse</td></tr>
+            <tr><th>Google Rating</th><td>3.7/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>150–250</td></tr>
+            <tr><th>Notes</th><td>Famous for its signature steak with secret sauce; located in Al Faisaliah Tower.</td></tr>
+            <tr><th>Contact</th><td>9200 18998</td></tr>
+
+          </table>
+          <div class="rating" data-rating="3.7"></div>
+          <a href="https://entrecote.sa/en/menu" target="_blank">View Menu</a>
+          <div class="buttons">
+            <a href="https://entrecote.sa/en/reservation/website/entrecote-faisaliah-tower/" target="_blank">Reserve</a>
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b> King Fahd Branch Rd, Al Faisaliah Tower, Riyadh &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.7136, 46.6753</span>
+            <a href="https://maps.app.goo.gl/qtGs65oXPqZ1T9dH8" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+        <div class="list-item" data-type="restaurant" data-neighborhood="Al Safarat" data-price="$$" data-rating="4.4" data-cuisine="Fusion cuisine" data-name="Parker's" data-coords="24.6930,46.6580">
+          <h3>Parker's</h3><span class="tag">Restaurant</span>
+          <table class="overview-table">
+            <tr><th>Cuisine</th><td>Fusion cuisine</td></tr>
+            <tr><th>Google Rating</th><td>4.4/5</td></tr>
+            <tr><th>Avg. Price (SAR)</th><td>100–200</td></tr>
+            <tr><th>Notes</th><td>Known for truffle fries and Matilda Cake; elegant ambiance.</td></tr>
+            <tr><th>Contact</th><td>920024788</td></tr>
+
+          </table>
+          <div class="rating" data-rating="4.4"></div>
+          <a href="https://linktr.ee/parkersmenu" target="_blank">View Menu</a>
+          <div class="buttons">
+            <a href="https://web.thechefz.co/reservation/web/create/5731723" target="_blank">Reserve</a>
+          </div>
+          <ul class="review-list"></ul>
+          <div class="location"><b>Location:</b> MJPF+M36, Al Idrisi, Al Safarat, Riyadh 12513 &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.6930, 46.6580</span>
+            <a href="https://maps.app.goo.gl/HWKDmtE6qCE9Ctg78" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- EVENTS SECTION -->
+    <section class="section-events" id="events-section">
+        <h2 class="section-title">🎉 Events</h2>
+        <div class="list-view" id="events-list">
+          <div class="list-item" data-type="event" data-category="Food" data-name="The Saudi Food Show" data-coords="24.8034,46.6572" data-date="2025-05-12T00:00:00">
+            <h3>The Saudi Food Show</h3><span class="tag">Event</span>
+            <table class="overview-table">
+              <tr><th>Dates</th><td>May 12–14, 2025</td></tr>
+              <tr><th>Venue</th><td>Riyadh Front Exhibition & Conference Centre</td></tr>
+              <tr><th>Ticket Price (SAR)</th><td>150 (3-day pass)</td></tr>
+              <tr><th>Notes</th><td>The largest F&B sourcing event in Saudi Arabia, uniting global industry players.</td></tr>
+              <tr><th>Notes</th><td><a href="https://www.thesaudifoodshow.com/contact" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">Their Contact</a>
+              <a href="https://www.thesaudifoodshow.com/contact" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">Their Contact</a>
+            </table>
+            <span class="countdown"></span>
+            <p>Showcasing the best food from around the world.</p>
+            <div class="location"><b>Location:</b> Riyadh Front Exhibition & Conference Centre &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.8034, 46.6572</span>
+              <a href="https://maps.app.goo.gl/r8bmoTcwykVWjbPeA" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+            </div>
+          </div>
+          <div class="list-item" data-type="event" data-category="Lifestyle" data-name="Smart Data & AI Summit" data-coords="24.7538,46.6525" data-date="2025-05-05T00:00:00">
+            <h3>Smart Data & AI Summit</h3><span class="tag">Event</span>
+            <table class="overview-table">
+              <tr><th>Dates</th><td>May 5–6, 2025</td></tr>
+              <tr><th>Venue</th><td>JW Marriott Hotel Riyadh</td></tr>
+              <tr><th>Ticket Price (SAR)</th><td>Free!</td></tr>
+              <tr><th>Notes</th><td>A premier gathering of over 300 data and AI professionals.</td></tr>
+              <tr><th>Contact</th><td>0115117777</td></tr>
+
+            </table>
+            <span class="countdown"></span>
+            <p>The region's largest data & AI conference.</p>
+            <div class="location"><b>Location:</b> JW Marriott Hotel Riyadh &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.7538, 46.6525</span>
+              <a href="https://maps.app.goo.gl/ZtEwjacLnx1QZSpp8" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+            </div>
+          </div>
+          <div class="list-item" data-type="event" data-category="Lifestyle" data-name="Global Project Management Forum (GPMF)" data-coords="24.6620,46.6740" data-date="2025-05-17T00:00:00">
+            <h3>Global Project Management Forum (GPMF)</h3><span class="tag">Event</span>
+            <table class="overview-table">
+              <tr><th>Dates</th><td>May 17–19, 2025</td></tr>
+              <tr><th>Venue</th><td>Fairmont Hotel, Riyadh</td></tr>
+              <tr><th>Ticket Price (SAR)</th><td>Free (Forum & Exhibition), 1000 + VAT (Workshops & Masterclasses)</td></tr>
+              <tr><th>Notes</th><td>The largest project management forum in the MENA region.</td></tr>
+              <tr><th>Contact</th><td>+966 54 409 6764</td></tr>
+            </table>
+            <span class="countdown"></span>
+            <p>Global thought-leadership in project management.</p>
+            <div class="location"><b>Location:</b> Fairmont Hotel, Riyadh &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.6620, 46.6740</span>
+              <a href="https://maps.app.goo.gl/HsXStMZzAxCmrACh8" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+            </div>
+          </div>
+          <div class="list-item" data-type="event" data-category="Sports" data-name="Canelo Alvarez vs. William Scull – Fatal Fury PPV" data-coords="24.7230,46.6700" data-date="2025-05-03T00:00:00">
+            <h3>Canelo Alvarez vs. William Scull – Fatal Fury PPV</h3><span class="tag">Event</span>
+            <table class="overview-table">
+              <tr><th>Dates</th><td>May 3, 2025</td></tr>
+              <tr><th>Venue</th><td>ANB Arena, Riyadh</td></tr>
+            <tr><th>Ticket Price (SAR)</th><td>80 - 800</td></tr>
+              <tr><th>Notes</th><td>A super-middleweight title unification bout.</td></tr>
+              <tr><th>Contact</th><td>920035043</td></tr>
+
+
+            </table>
+            <span class="countdown"></span>
+            <p>The biggest boxing event of the year.</p>
+            <div class="location"><b>Location:</b> ANB Arena, Riyadh &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.7230, 46.6700</span>
+              <a href="https://maps.app.goo.gl/B7s9Tihuut5DXY7y9" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+            </div>
+          </div>
+          <div class="list-item" data-type="event" data-category="Expo" data-name="Saudi Entertainment & Amusement Expo 2025" data-coords="24.8034,46.6572" data-date="2025-05-20T00:00:00">
+            <h3>Saudi Entertainment & Amusement Expo 2025</h3><span class="tag">Event</span>
+            <table class="overview-table">
+              <tr><th>Dates</th><td>May 20–22, 2025</td></tr>
+              <tr><th>Venue</th><td>Riyadh Front Exhibition & Conference Centre</td></tr>
+              <tr><th>Ticket Price (SAR)</th><td>Free!</td></tr>
+              <tr><th>Notes</th><td>The region's leading platform for the entertainment and amusement industry.</td></tr>
+              <tr><th>Contact</th><td>marketing@saudientertainmentexpo.com</td></tr>
+
+            </table>
+            <span class="countdown"></span>
+            <p>Discover the future of entertainment and amusement industries.</p>
+            <div class="location"><b>Location:</b> Riyadh Front Exhibition and Conference Centre &nbsp;|&nbsp; <span style="font-size:0.97em;color:#888;">24.8034, 46.6572</span>
+              <a href="https://maps.app.goo.gl/UMLGfXiEdAfiPJjB8" target="_blank" style="margin-left:0.7em;color:#0077cc;text-decoration:underline;font-size:0.92em;">View on Map</a>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="map" id="map">
+        <h3 class="section-title">📍 Interactive Map of Riyadh Cafes, Restaurants & Events</h3>
+        <div id="mapid"></div>
+      </section>
+    </div>
+    <footer>
+      <p>&copy; 2025 MYRIYADH. All rights reserved. | <a href="#">Contact Us myriyadh.ash@gmail.com</a></p>
+    </footer>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+      function renderStars(el, rating) {
+        el.innerHTML = '';
+        for(let i=1; i<=5; i++) {
+          let star = document.createElement('span');
+          star.className = 'star' + (i <= Math.round(rating) ? '' : ' inactive');
+          star.innerHTML = '★';
+          el.appendChild(star);
+        }
+      }
+      document.querySelectorAll('.rating[data-rating]').forEach(el => {
+        renderStars(el, el.getAttribute('data-rating'));
+      });
+  
+      const reviewsData = {
+        "Ōkawa": ["Great flat white and vibes! – Sara", "Loved the desserts. – Faisal"],
+        "Chérie": ["Chic place for coffee. – Aisha", "Desserts were amazing! – Omar"],
+        "Alf": ["Modern and spacious. – Reem", "Good pastries. – Yara"],
+        "BTW": ["Friendly staff and trendy decor. – Ahmed"],
+        "Belong": ["Perfect for working, super fast WiFi. – Noura"],
+        "Crops": ["Great for study sessions. – Faisal"],
+        "Signor Sassi": ["Best Italian food in Riyadh. – Rami"],
+        "Public": ["Fusion dishes are top-notch. – Laila"],
+        "Beefbar": ["Steaks were juicy and perfect! – Khalid"],
+        "Entrecôte Café de Paris": ["Loved the secret sauce. – Mona"],
+        "Parker's": ["International menu and great service. – Abdullah"]
+      };
+      document.querySelectorAll('.list-item').forEach(card => {
+        const name = card.getAttribute('data-name');
+        const ul = card.querySelector('.review-list');
+        if (ul && reviewsData[name]) {
+          ul.innerHTML = reviewsData[name].map(x => `<li>${x}</li>`).join('');
+        }
+      });
+  
+      function updateCountdowns() {
+        const now = new Date();
+        document.querySelectorAll('.list-item[data-date]').forEach(card => {
+          const dateStr = card.getAttribute('data-date');
+          const countdown = card.querySelector('.countdown');
+          if (!countdown) return;
+          const date = new Date(dateStr);
+          let diff = date - now;
+          if (diff <= 0) {
+            countdown.textContent = "Event is Live!";
+          } else {
+            let days = Math.floor(diff/(1000*60*60*24));
+            let hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+            let mins = Math.floor((diff%(1000*60*60))/(1000*60));
+            let secs = Math.floor((diff%(1000*60))/1000);
+            countdown.textContent = `Starts in: ${days}d ${hours}h ${mins}m ${secs}s`;
+          }
+        });
+      }
+      setInterval(updateCountdowns, 1000);
+      updateCountdowns();
+  
+      const map = L.map('mapid').setView([24.7136, 46.6753], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+        maxZoom: 19,
+      }).addTo(map);
+  
+      // All cards in all sections
+      const allCards = Array.from(document.querySelectorAll('.list-item[data-coords]'));
+      let markers = [];
+      function addMarkers(cards) {
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+        cards.forEach(card => {
+          const name = card.getAttribute('data-name');
+          const coordsAttr = card.getAttribute('data-coords');
+          if (coordsAttr) {
+            const [lat, lng] = coordsAttr.split(',').map(Number);
+            const marker = L.marker([lat, lng]).addTo(map);
+            marker.bindPopup(`<b>${name}</b>`);
+            markers.push(marker);
+          }
+        });
+        if (cards.length > 0) {
+          const [lat, lng] = cards[0].getAttribute('data-coords').split(',').map(Number);
+          map.setView([lat, lng], 14);
+        }
+      }
+      addMarkers(allCards);
+  
+      // --- FILTERING LOGIC ---
+      const FILTER_CONFIG = [
+        { id: 'filter-neighborhood', label: 'Neighborhood' },
+        { id: 'filter-type', label: 'Type' },
+        { id: 'filter-price', label: 'Price' },
+        { id: 'filter-rating', label: 'Rating' },
+        { id: 'filter-cuisine', label: 'Cuisine' },
+        { id: 'filter-coffee', label: 'Coffee' },
+        { id: 'filter-event-category', label: 'Event Category' }
+      ];
+  
+      function updateFilterChips() {
+        const chipsDiv = document.getElementById('filter-chips');
+        chipsDiv.innerHTML = '';
+        FILTER_CONFIG.forEach(cfg => {
+          const el = document.getElementById(cfg.id);
+          let val = el.value;
+          if (val) {
+            let display = val;
+            if (cfg.id === 'filter-rating') display += '+';
+            if (el.tagName === 'SELECT') display = el.options[el.selectedIndex].text;
+            const chip = document.createElement('div');
+            chip.className = 'chip';
+            chip.innerHTML = `${cfg.label}: ${display} <span title="Remove filter" tabindex="0" role="button" aria-label="Remove filter">&times;</span>`;
+            chip.onclick = () => { el.value = ""; };
+            chip.querySelector('span').onclick = (e) => {
+              e.stopPropagation();
+              el.value = "";
+              applyFilters();
+            };
+            chipsDiv.appendChild(chip);
+          }
+        });
+        // Add chip for search
+        const searchInput = document.getElementById("search-input");
+        if (searchInput.value.trim()) {
+          const chip = document.createElement('div');
+          chip.className = 'chip';
+          chip.innerHTML = `Search: ${searchInput.value.trim()} <span title="Clear search" tabindex="0" role="button" aria-label="Clear search">&times;</span>`;
+          chip.onclick = () => { searchInput.value = ""; applyFilters(); };
+          chip.querySelector('span').onclick = (e) => {
+            e.stopPropagation();
+            searchInput.value = "";
+            applyFilters();
+          };
+          chipsDiv.appendChild(chip);
+        }
+        document.querySelector('.filters .clear-btn').style.display = (chipsDiv.childElementCount > 0) ? 'inline-block' : 'none';
+      }
+  
+      function clearAllFilters() {
+        FILTER_CONFIG.forEach(cfg => {
+          document.getElementById(cfg.id).value = "";
+        });
+        document.getElementById("search-input").value = "";
+        applyFilters();
+      }
+  
+      // MAIN FILTER FUNCTION (only called on "Apply Filters" or "Search" button)
+      function applyFilters() {
+        const neighborhood = document.getElementById("filter-neighborhood").value;
+        const type = document.getElementById("filter-type").value;
+        const price = document.getElementById("filter-price").value;
+        const rating = document.getElementById("filter-rating").value;
+        const cuisine = document.getElementById("filter-cuisine").value;
+        const coffee = document.getElementById("filter-coffee").value;
+        const eventCat = document.getElementById("filter-event-category").value;
+        const searchText = document.getElementById("search-input").value.trim().toLowerCase();
+  
+        // Sectioned lists
+        const cafesList = document.getElementById('cafes-list').querySelectorAll('.list-item[data-type="cafe"]');
+        const restaurantsList = document.getElementById('restaurants-list').querySelectorAll('.list-item[data-type="restaurant"]');
+        const eventsList = document.getElementById('events-list').querySelectorAll('.list-item[data-type="event"]');
+  
+        const visibleCafeCards = [];
+        const visibleRestCards = [];
+        const visibleEventCards = [];
+        const visibleCards = [];
+  
+        // CAFES
+        cafesList.forEach(card => {
+          let show = true;
+          if (neighborhood && card.getAttribute('data-neighborhood') !== neighborhood) show = false;
+          if (type && card.getAttribute('data-type') !== type) show = false;
+          if (price && card.getAttribute('data-price') !== price) show = false;
+          if (rating && Number(card.getAttribute('data-rating')) < Number(rating)) show = false;
+          if (cuisine && card.getAttribute('data-cuisine') && card.getAttribute('data-cuisine') !== cuisine) show = false;
+          if (coffee && card.getAttribute('data-coffee') && card.getAttribute('data-coffee') !== coffee) show = false;
+          if (eventCat) show = false;
+          if (searchText) {
+            const terms = searchText.split(/\s+/);
+            let target = (card.textContent + ' ' + (card.getAttribute('data-cuisine')||'') + ' ' + (card.getAttribute('data-coffee')||'')).toLowerCase();
+            for (let term of terms) {
+              if (!target.includes(term)) { show = false; break; }
+            }
+          }
+          card.classList.toggle('hidden', !show);
+          if (show) visibleCafeCards.push(card);
+          if (show) visibleCards.push(card);
+        });
+        // RESTAURANTS
+        restaurantsList.forEach(card => {
+          let show = true;
+          if (neighborhood && card.getAttribute('data-neighborhood') !== neighborhood) show = false;
+          if (type && card.getAttribute('data-type') !== type) show = false;
+          if (price && card.getAttribute('data-price') !== price) show = false;
+          if (rating && Number(card.getAttribute('data-rating')) < Number(rating)) show = false;
+          if (cuisine && card.getAttribute('data-cuisine') && card.getAttribute('data-cuisine') !== cuisine) show = false;
+          if (coffee) show = false;
+          if (eventCat) show = false;
+          if (searchText) {
+            const terms = searchText.split(/\s+/);
+            let target = (card.textContent + ' ' + (card.getAttribute('data-cuisine')||'')).toLowerCase();
+            for (let term of terms) {
+              if (!target.includes(term)) { show = false; break; }
+            }
+          }
+          card.classList.toggle('hidden', !show);
+          if (show) visibleRestCards.push(card);
+          if (show) visibleCards.push(card);
+        });
+        // EVENTS
+        eventsList.forEach(card => {
+          let show = true;
+          if (neighborhood) show = false;
+          if (type && card.getAttribute('data-type') !== type) show = false;
+          if (price) show = false;
+          if (rating) show = false;
+          if (cuisine) show = false;
+          if (coffee) show = false;
+          if (eventCat && card.getAttribute('data-category') !== eventCat) show = false;
+          if (eventCat && !card.getAttribute('data-category')) show = false;
+          if (searchText) {
+            const terms = searchText.split(/\s+/);
+            let target = (card.textContent + ' ' + (card.getAttribute('data-category')||'')).toLowerCase();
+            for (let term of terms) {
+              if (!target.includes(term)) { show = false; break; }
+            }
+          }
+          card.classList.toggle('hidden', !show);
+          if (show) visibleEventCards.push(card);
+          if (show) visibleCards.push(card);
+        });
+  
+        addMarkers(visibleCards);
+  
+        if (visibleCards.length === 0) {
+          map.setView([24.7136, 46.6753], 11);
+        }
+        updateFilterChips();
+      }
+  
+      // FILTER FIELDS: Only apply filters on button click or search
+      FILTER_CONFIG.forEach(cfg => {
+        document.getElementById(cfg.id).addEventListener("change", function(){
+          // do nothing on change
+        });
+      });
+      document.getElementById("search-input").addEventListener("input", function(){});
+      document.getElementById("search-btn").addEventListener("click", applyFilters);
+  
+      function bindMarkerEvents() {
+        markers.forEach(marker => {
+          marker.on('click', function() {
+            const name = marker.getPopup().getContent().replace(/<b>|<\/b>/g, '');
+            const card = allCards.find(c => c.getAttribute('data-name') === name);
+            if (card) {
+              card.scrollIntoView({behavior: "smooth", block: "center"});
+              card.classList.add('highlight');
+              setTimeout(()=>card.classList.remove('highlight'), 2000);
+            }
+          });
+        });
+      }
+      setInterval(bindMarkerEvents, 1000);
+      // Initial filter on load
+      applyFilters();
+    </script>
+  </body>
+  </html>
