@@ -1,0 +1,3014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYRIYADH | Premium Guide to Cafés, Restaurants & Events</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --accent: #f59e0b;
+      --accent-dark: #d97706;
+      --text: #1f2937;
+      --text-light: #6b7280;
+      --bg: #f9fafb;
+      --card-bg: #ffffff;
+      --section-cafe: #f0f9ff;
+      --section-restaurant: #fff7ed;
+      --section-event: #f5f3ff;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --radius: 8px;
+      --radius-lg: 12px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Dark mode variables */
+    [data-theme="dark"] {
+      --primary: #3b82f6;
+      --primary-light: #60a5fa;
+      --primary-dark: #2563eb;
+      --text: #f9fafb;
+      --text-light: #d1d5db;
+      --bg: #1f2937;
+      --card-bg: #374151;
+      --section-cafe: #1e3a8a;
+      --section-restaurant: #7c2d12;
+      --section-event: #5b21b6;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--text);
+      background-color: var(--bg);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.3s ease;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: white;
+      padding: 80px 0 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.025em;
+    }
+
+    .tagline {
+      font-size: 1.125rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto 24px;
+    }
+
+    .author-badge {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Navigation */
+    nav {
+      background-color: var(--card-bg);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .nav-link {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 16px 20px;
+      margin: 0 2px;
+      transition: var(--transition);
+      position: relative;
+      font-size: 0.9375rem;
+    }
+
+    .nav-link:hover, .nav-link:focus {
+      color: var(--primary);
+    }
+
+    .nav-link:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 20px;
+      right: 20px;
+      height: 2px;
+      background-color: var(--primary);
+      transform: scaleX(0);
+      transition: var(--transition);
+    }
+
+    .nav-link:hover:after, .nav-link:focus:after {
+      transform: scaleX(1);
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg);
+      z-index: 99;
+      border: none;
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 48px 0 64px;
+    }
+
+    .hero h1 {
+      font-size: 2.25rem;
+      margin-bottom: 16px;
+      color: var(--primary-dark);
+    }
+
+    .hero p {
+      max-width: 700px;
+      margin: 0 auto 32px;
+      color: var(--text-light);
+      font-size: 1.125rem;
+    }
+
+    /* Quick filters */
+    .quick-filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .quick-filter {
+      padding: 8px 16px;
+      background-color: var(--card-bg);
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+      border: 1px solid #e5e7eb;
+    }
+
+    .quick-filter:hover, .quick-filter.active {
+      background-color: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Search & Filters */
+    .search-container {
+      background-color: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 32px;
+    }
+
+    .search-bar {
+      display: flex;
+      margin-bottom: 24px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius) 0 0 var(--radius);
+      font-size: 1rem;
+      outline: none;
+      transition: var(--transition);
+      background-color: var(--card-bg);
+      color: var(--text);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .search-btn {
+      padding: 0 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .filter-group {
+      margin-bottom: 0;
+    }
+
+    .filter-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text);
+      font-size: 0.875rem;
+    }
+
+    .filter-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius);
+      font-size: 0.9375rem;
+      transition: var(--transition);
+      background-color: var(--card-bg);
+      color: var(--text);
+    }
+
+    .filter-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      outline: none;
+    }
+
+    .filter-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+
+    .filter-btn {
+      padding: 10px 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      font-size: 0.9375rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .clear-btn:hover {
+      color: var(--primary);
+    }
+
+    .active-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .filter-chip {
+      background-color: var(--primary-light);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 0.8125rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    .filter-chip button {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 0.875rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 48px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .section-header {
+      padding: 20px 24px;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .section-icon {
+      font-size: 1.5rem;
+    }
+
+    .section-cafe .section-header {
+      background-color: #0ea5e9;
+    }
+
+    .section-restaurant .section-header {
+      background-color: #f97316;
+    }
+
+    .section-event .section-header {
+      background-color: #8b5cf6;
+    }
+
+    .section-content {
+      background-color: var(--card-bg);
+      padding: 24px;
+    }
+
+    /* Cards */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      border: 1px solid #e5e7eb;
+      position: relative;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .favorite-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      color: #ccc;
+      transition: var(--transition);
+    }
+
+    .favorite-btn:hover {
+      color: #ff6b6b;
+    }
+
+    .favorite-btn.active {
+      color: #ff6b6b;
+    }
+
+    .card-header {
+      padding: 20px;
+      border-bottom: 1px solid #f3f4f6;
+      position: relative;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title:before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 9999px;
+      background-color: var(--primary);
+    }
+
+    .section-cafe .card-title:before {
+      background-color: #0ea5e9;
+    }
+
+    .section-restaurant .card-title:before {
+      background-color: #f97316;
+    }
+
+    .section-event .card-title:before {
+      background-color: #8b5cf6;
+    }
+
+    .card-tag {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: var(--accent);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .card-body {
+      padding: 0 20px 20px;
+    }
+
+    .card-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+      font-size: 0.9375rem;
+    }
+
+    .card-table th, .card-table td {
+      padding: 12px 0;
+      text-align: left;
+      border-bottom: 1px solid #f3f4f6;
+      vertical-align: top;
+    }
+
+    .card-table th {
+      font-weight: 500;
+      color: var(--text-light);
+      width: 35%;
+      font-size: 0.875rem;
+    }
+
+    .card-table tr:last-child th, 
+    .card-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .card-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+
+    .star {
+      color: var(--accent);
+      font-size: 1rem;
+    }
+
+    .star.inactive {
+      color: #e5e7eb;
+    }
+
+    .card-reviews {
+      margin-top: 16px;
+      padding-left: 20px;
+      font-size: 0.9375rem;
+      color: var(--text-light);
+    }
+
+    .card-reviews li {
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .card-reviews li:before {
+      content: "•";
+      position: absolute;
+      left: -16px;
+      color: var(--primary);
+    }
+
+    .section-cafe .card-reviews li:before {
+      color: #0ea5e9;
+    }
+
+    .section-restaurant .card-reviews li:before {
+      color: #f97316;
+    }
+
+    .section-event .card-reviews li:before {
+      color: #8b5cf6;
+    }
+
+    .card-footer {
+      padding: 16px 20px;
+      border-top: 1px solid #f3f4f6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-location {
+      color: var(--text-light);
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-location svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .card-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      font-size: 0.875rem;
+    }
+
+    .card-link:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    .card-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .card-btn {
+      padding: 8px 16px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-btn:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .card-btn.secondary {
+      background-color: #f3f4f6;
+      color: var(--text);
+    }
+
+    .card-btn.secondary:hover {
+      background-color: #e5e7eb;
+    }
+
+    .card-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Social sharing */
+    .social-share {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .social-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+
+    .social-btn.instagram {
+      background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D);
+    }
+
+    .social-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Map */
+    .map-container {
+      margin: 48px 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid #e5e7eb;
+    }
+
+    .map-header {
+      padding: 16px 24px;
+      background-color: var(--primary);
+      color: white;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .map-header svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    #map {
+      height: 400px;
+      width: 100%;
+    }
+
+    /* Countdown */
+    .countdown {
+      font-weight: 600;
+      color: #ef4444;
+      margin: 16px 0;
+      font-size: 0.9375rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .countdown svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Footer */
+    footer {
+      background-color: var(--primary-dark);
+      color: white;
+      padding: 48px 0;
+      margin-top: 64px;
+    }
+
+    .footer-content {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin: 20px 0;
+    }
+
+    .footer-link {
+      color: white;
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 0.875rem;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+
+    .footer-link:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .copyright {
+      font-size: 0.8125rem;
+      opacity: 0.7;
+      margin-top: 24px;
+    }
+
+    /* Newsletter */
+    .newsletter {
+      margin-top: 32px;
+    }
+
+    .newsletter-title {
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .newsletter-form {
+      display: flex;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .newsletter-input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius) 0 0 var(--radius);
+      font-size: 0.9375rem;
+      outline: none;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .newsletter-input::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .newsletter-btn {
+      padding: 0 16px;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .newsletter-btn:hover {
+      background-color: var(--accent-dark);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .logo {
+        font-size: 2rem;
+      }
+      
+      .nav-container {
+        flex-wrap: wrap;
+        padding: 8px 0;
+      }
+      
+      .nav-link {
+        padding: 12px 16px;
+        font-size: 0.875rem;
+      }
+      
+      .filters {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .header {
+        padding: 64px 0 48px;
+      }
+
+      .author-badge {
+        top: 16px;
+        left: 16px;
+      }
+
+      .search-container {
+        padding: 20px;
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+      }
+      
+      .filter-actions {
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .filter-btn, .clear-btn {
+        width: 100%;
+      }
+
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        max-width: 100%;
+      }
+
+      .card-buttons {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .card-btn {
+        padding: 6px 12px;
+        font-size: 0.8125rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo {
+        font-size: 1.75rem;
+      }
+
+      .tagline {
+        font-size: 1rem;
+      }
+
+      .hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .section-header {
+        padding: 16px 20px;
+      }
+
+      .section-title {
+        font-size: 1.125rem;
+      }
+
+      .section-content {
+        padding: 20px;
+      }
+
+      .card-header, .card-body, .card-footer {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .newsletter-form {
+        flex-direction: column;
+      }
+
+      .newsletter-input {
+        border-radius: var(--radius) var(--radius) 0 0;
+      }
+
+      .newsletter-btn {
+        border-radius: 0 0 var(--radius) var(--radius);
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content container">
+      <span class="author-badge">By Abdulrahman Al Harbi</span>
+      <h1 class="logo">MYRIYADH</h1>
+      <p class="tagline">Your curated guide to the finest cafés, restaurants, and events in Saudi Arabia's vibrant capital</p>
+    </div>
+  </header>
+
+  <nav>
+    <div class="container nav-container">
+      <a href="#cafes" class="nav-link">Cafés</a>
+      <a href="#restaurants" class="nav-link">Restaurants</a>
+      <a href="#events" class="nav-link">Events</a>
+      <a href="#map" class="nav-link">Map</a>
+      <a href="#favorites" class="nav-link">Favorites</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Discover Riyadh's Best</h1>
+      <p>Explore the finest cafés, restaurants, and upcoming events in Saudi Arabia's vibrant capital. Filter by neighborhood, cuisine, price and more to find your perfect spot.</p>
+    </section>
+
+    
+    <div class="quick-filters">
+      <div class="quick-filter" data-filter="top-rated">⭐ Top Rated</div>
+      <div class="quick-filter" data-filter="budget">💰 Budget-Friendly</div>
+      <div class="quick-filter" data-filter="new">🆕 Newly Added</div>
+      <div class="quick-filter" data-filter="events">🎉 Upcoming Events</div>
+      <div class="quick-filter" data-filter="coffee">☕ Specialty Coffee</div>
+    </div>
+
+    <section id="filters" class="search-container">
+      <div class="search-bar">
+        <input type="text" id="search-input" class="search-input" placeholder="Search for cafés, restaurants or events...">
+        <button id="search-btn" class="search-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          Search
+        </button>
+      </div>
+
+      <div class="filters">
+        <div class="filter-group">
+          <label for="filter-neighborhood" class="filter-label">Neighborhood</label>
+          <select id="filter-neighborhood" class="filter-select">
+            <option value="">All Areas</option>
+            <option value="An Narjis">An Narjis</option>
+            <option value="Al Olaya">Al Olaya</option>
+            <option value="Al Wadi">Al Wadi</option>
+            <option value="An Nafal">An Nafal</option>
+            <option value="Hittin">Hittin</option>
+            <option value="As Sulimaniyah">As Sulimaniyah</option>
+            <option value="Al Safarat">Al Safarat</option>
+            <option value="Al Faisaliah">Al Faisaliah</option>
+            <option value="Al Malqa">Al Malqa</option>
+            <option value="Al Mohammadiyah">Al Mohammadiyah</option>
+            <option value="Al Yasmin">Al Yasmin</option>
+            <option value="Al Nakheel">Al Nakheel</option>
+            <option value="Al Mursalat">Al Mursalat</option>
+            <option value="Al Murabba">Al Murabba</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-type" class="filter-label">Type</label>
+          <select id="filter-type" class="filter-select">
+            <option value="">All Types</option>
+            <option value="cafe">Café</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="event">Event</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-price" class="filter-label">Price</label>
+          <select id="filter-price" class="filter-select">
+            <option value="">All Prices</option>
+            <option value="$">$ Budget</option>
+            <option value="$$">$$ Moderate</option>
+            <option value="$$$">$$$ Premium</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-rating" class="filter-label">Rating</label>
+          <select id="filter-rating" class="filter-select">
+            <option value="">All Ratings</option>
+            <option value="4.5">4.5+ ★</option>
+            <option value="4">4.0+ ★</option>
+            <option value="3">3.0+ ★</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-cuisine" class="filter-label">Cuisine</label>
+          <select id="filter-cuisine" class="filter-select">
+            <option value="">All Cuisines</option>
+            <option value="Italian">Italian</option>
+            <option value="International">International</option>
+            <option value="Steakhouse">Steakhouse</option>
+            <option value="French">French</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Chinese">Chinese</option>
+            <option value="Latin American">Latin American</option>
+            <option value="American">American</option>
+            <option value="Cafe">Café</option>
+            <option value="Specialty Coffee">Specialty Coffee</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-coffee" class="filter-label">Coffee Type</label>
+          <select id="filter-coffee" class="filter-select">
+            <option value="">All Types</option>
+            <option value="Specialty">Specialty</option>
+            <option value="Trendy">Trendy</option>
+            <option value="Modern">Modern</option>
+            <option value="Desserts">Desserts</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-event-category" class="filter-label">Event Category</label>
+          <select id="filter-event-category" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="Food">Food</option>
+            <option value="Lifestyle">Lifestyle</option>
+            <option value="Sports">Sports</option>
+            <option value="Expo">Expo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button id="apply-btn" class="filter-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line>
+            <line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+          Apply Filters
+        </button>
+        <button id="clear-btn" class="clear-btn">Clear All Filters</button>
+      </div>
+
+      <div id="active-filters" class="active-filters"></div>
+    </section>
+
+    
+    <section id="cafes" class="section section-cafe">
+      <div class="section-header">
+        <h2 class="section-title">Cafés</h2>
+        <span class="section-icon">☕</span>
+      </div>
+      <div class="section-content">
+        <div class="cards-grid" id="cafes-list">
+          
+        </div>
+      </div>
+    </section>
+
+    
+    <section id="restaurants" class="section section-restaurant">
+      <div class="section-header">
+        <h2 class="section-title">Restaurants</h2>
+        <span class="section-icon">🍽️</span>
+      </div>
+      <div class="section-content">
+        <div class="cards-grid" id="restaurants-list">
+          
+        </div>
+      </div>
+    </section>
+
+    
+    <section id="events" class="section section-event">
+      <div class="section-header">
+        <h2 class="section-title">Events</h2>
+        <span class="section-icon">🎉</span>
+      </div>
+      <div class="section-content">
+        <div class="cards-grid" id="events-list">
+          
+        </div>
+      </div>
+    </section>
+
+    
+    <section id="favorites" class="section" style="display: none;">
+      <div class="section-header">
+        <h2 class="section-title">Your Favorites</h2>
+        <span class="section-icon">❤️</span>
+      </div>
+      <div class="section-content">
+        <div class="cards-grid" id="favorites-list">
+          
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="map-container">
+      <div class="map-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        Riyadh Cafés, Restaurants & Events Map
+      </div>
+      <div id="map"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-content">
+      <div class="footer-logo">MYRIYADH</div>
+      <div class="footer-links">
+        <a href="#" class="footer-link">About</a>
+        <a href="#" class="footer-link">Contact</a>
+        <a href="#" class="footer-link">Privacy</a>
+        <a href="#" class="footer-link">Terms</a>
+      </div>
+      
+      <div class="newsletter">
+        <div class="newsletter-title">Stay updated with Riyadh's best</div>
+        <form class="newsletter-form" id="newsletter-form">
+          <input type="email" class="newsletter-input" placeholder="Your email address" required>
+          <button type="submit" class="newsletter-btn">Subscribe</button>
+        </form>
+      </div>
+      
+      <p class="copyright">© 2025 MYRIYADH. All rights reserved. By Abdulrahman Al Harbi</p>
+    </div>
+  </footer>
+
+  
+  <button class="theme-toggle" id="theme-toggle">
+    <i class="fas fa-moon"></i>
+  </button>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Data for all venues and events
+    const data = {
+      cafes: [
+        {
+          name: "Ōkawa",
+          type: "cafe",
+          neighborhood: "An Narjis",
+          price: "$$",
+          rating: 4.3,
+          cuisine: "Japanese-style café",
+          coffee: "Specialty",
+          coords: [24.8341, 46.7225],
+          overview: {
+            "Cuisine": "Japanese-style café",
+            "Google Rating": "4.3/5",
+            "Avg. Price (SAR)": "50–100",
+            "Hours": "7:00 AM - 2:00 AM (except Friday 7 AM - 11:30 AM, 12:30 PM - 2 AM)",
+            "Notes": "Known for fluffy Japanese pancakes and matcha drinks. Cozy interior; parking may be limited.",
+            "Contact": "0502519311"
+          },
+          reviews: [
+            "Great flat white and vibes! – Sara",
+            "Loved the desserts. – Faisal"
+          ],
+          links: {
+            "Location": "https://maps.app.goo.gl/v1fW9maQRPLnUi8N6"
+          }
+        },
+        {
+          name: "Chérie",
+          type: "cafe",
+          neighborhood: "Al Olaya",
+          price: "$$",
+          rating: 4.7,
+          cuisine: "Specialty coffee & pastries",
+          coffee: "Desserts",
+          coords: [24.6897, 46.6873],
+          overview: {
+            "Cuisine": "Specialty coffee & pastries",
+            "Google Rating": "4.7/5",
+            "Avg. Price (SAR)": "50–100",
+            "Hours": "Open 24 hours (except Friday 12:30 PM - 12 AM)",
+            "Notes": "Offers Spanish lattes, tiramisu, and cheesecake. Cozy atmosphere with outdoor seating.",
+            "Contact": "https://www.instagram.com/cherie.sa1/?hl=en"
+          },
+          reviews: [
+            "Chic place for coffee. – Aisha",
+            "Desserts were amazing! – Omar"
+          ],
+          links: {
+            "Location": "https://maps.app.goo.gl/oCaxRMHctaP2mFAP9"
+          }
+        },
+        {
+          name: "Alf",
+          type: "cafe",
+          neighborhood: "Al Wadi",
+          price: "$$",
+          rating: 4.5,
+          cuisine: "Specialty coffee & desserts",
+          coffee: "Modern",
+          coords: [24.7899, 46.7658],
+          overview: {
+            "Cuisine": "Specialty coffee & desserts",
+            "Google Rating": "4.5/5",
+            "Avg. Price (SAR)": "50–100",
+            "Hours": "7:00 AM - 12:30 AM",
+            "Notes": "Features a minimalist, Instagrammable interior with a water feature. Offers specialty coffee and desserts.",
+            "Contact": "0545249936"
+          },
+          reviews: [
+            "Modern and spacious. – Reem",
+            "Good pastries. – Yara"
+          ],
+          links: {
+            "Location": "https://maps.app.goo.gl/iHMhqyHxVG14AN4f6"
+          }
+        },
+        {
+          name: "BTW",
+          type: "cafe",
+          neighborhood: "An Nafal",
+          price: "$$",
+          rating: 4.6,
+          cuisine: "Specialty coffee",
+          coffee: "Trendy",
+          coords: [24.7743, 46.7121],
+          overview: {
+            "Cuisine": "Specialty coffee",
+            "Google Rating": "4.6/5",
+            "Avg. Price (SAR)": "50–100",
+            "Hours": "6:00 AM - 12:00 AM",
+            "Notes": "Limited information available; presumed to be a local specialty café.",
+            "Contact": "https://www.instagram.com/btw.sa/"
+          },
+          reviews: [
+            "Friendly staff and trendy decor. – Ahmed"
+          ],
+          links: {
+            "Location": "https://maps.app.goo.gl/NF7owiWbUVmFo3EH8"
+          }
+        },
+        {
+          name: "Belong",
+          type: "cafe",
+          neighborhood: "Hittin",
+          price: "$$",
+          rating: 4.4,
+          cuisine: "Specialty coffee",
+          coffee: "Specialty",
+          coords: [24.8244, 46.6311],
+          overview: {
+            "Cuisine": "Specialty coffee",
+            "Google Rating": "4.4/5",
+            "Avg. Price (SAR)": "50–100",
+            "Hours": "6:00 AM - 2:00 AM (except Friday 9 AM - 2 AM)",
+            "Notes": "Offers a variety of drinks in a cozy setting.",
+            "Contact": "0551900902"
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/qRfh5Ww8fBrFpkZj8"
+          }
+        },
+        {
+          name: "Crops",
+          type: "cafe",
+          neighborhood: "Al Yasmin",
+          price: "$$",
+          rating: 4.5,
+          cuisine: "Specialty coffee",
+          coffee: "Specialty",
+          coords: [24.8111, 46.6753],
+          overview: {
+            "Cuisine": "Specialty coffee",
+            "Google Rating": "4.5/5",
+            "Avg. Price (SAR)": "50–100",
+            "Hours": "7:00 AM - 12:00 AM",
+            "Notes": "Great place to work or study; offers specialty coffee and a comfortable environment.",
+            "Contact": "0544801080"
+          },
+          reviews: [
+            "Perfect for working, super fast WiFi. – Noura"
+          ],
+          links: {
+            "Location": "https://maps.app.goo.gl/9iy3k1sCGU2GsgTu8"
+          }
+        },
+        {
+          name: "Good Neighbor",
+          type: "cafe",
+          neighborhood: "Al Olaya",
+          price: "$",
+          rating: 4.4,
+          cuisine: "Cafe",
+          coffee: "Specialty",
+          coords: [24.7123, 46.6734],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.4/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "7:00 AM - 11:30 PM",
+            "Notes": "Cozy neighborhood café with great coffee and snacks.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/wC5XTLsAwxgBKnVP9"
+          }
+        },
+        {
+          name: "Truth",
+          type: "cafe",
+          neighborhood: "Al Nakheel",
+          price: "$",
+          rating: 4.6,
+          cuisine: "Specialty Coffee",
+          coffee: "Specialty",
+          coords: [24.8132, 46.6521],
+          overview: {
+            "Cuisine": "Specialty Coffee",
+            "Google Rating": "4.6/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "6:00 AM - 11:00 PM (except Thursday until 12 AM, Friday 1 PM - 12 AM)",
+            "Notes": "Specialty coffee with a focus on quality beans.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/ZdMNza22mzc5DoRc6"
+          }
+        },
+        {
+          name: "Some",
+          type: "cafe",
+          neighborhood: "Al Yasmin",
+          price: "$",
+          rating: 4.3,
+          cuisine: "Cafe",
+          coffee: "Modern",
+          coords: [24.8098, 46.6783],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.3/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "6:00 AM - 11:30 PM",
+            "Notes": "Modern café with a great atmosphere.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/q68vfG92z7akphmX7"
+          }
+        },
+        {
+          name: "Bab",
+          type: "cafe",
+          neighborhood: "Al Olaya",
+          price: "$",
+          rating: 4.5,
+          cuisine: "Cafe",
+          coffee: "Trendy",
+          coords: [24.6987, 46.6821],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.5/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "6:30 AM - 12:00 AM (except Thursday & Friday until 1 AM)",
+            "Notes": "Trendy café with great desserts.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/qLArNi6QDm2UAh7v5"
+          }
+        },
+        {
+          name: "Ouia",
+          type: "cafe",
+          neighborhood: "Al Nakheel",
+          price: "$",
+          rating: 4.4,
+          cuisine: "Cafe",
+          coffee: "Modern",
+          coords: [24.8154, 46.6492],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.4/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "6:00 AM - 1:00 AM (except Thursday & Friday until 2 AM)",
+            "Notes": "Modern café with a great selection of drinks.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/RUTkVb1ofQgGsQDMA"
+          }
+        },
+        {
+          name: "Veni",
+          type: "cafe",
+          neighborhood: "Al Olaya",
+          price: "$",
+          rating: 4.2,
+          cuisine: "Cafe",
+          coffee: "Specialty",
+          coords: [24.7012, 46.6845],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.2/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "6:30 AM - 12:00 AM (except Friday & Saturday 8:30 AM - 12 AM)",
+            "Notes": "Specialty coffee with a cozy atmosphere.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/DftAgJQGaNvpzFcp8"
+          }
+        },
+        {
+          name: "Belmont",
+          type: "cafe",
+          neighborhood: "Al Yasmin",
+          price: "$",
+          rating: 4.3,
+          cuisine: "Cafe",
+          coffee: "Modern",
+          coords: [24.8087, 46.6791],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.3/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "6:30 AM - 12:00 AM (except Friday & Saturday 8:30 AM - 12 AM)",
+            "Notes": "Modern café with great coffee and pastries.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/mJjftZku34SLr5Km9"
+          }
+        },
+        {
+          name: "Da Nonna",
+          type: "cafe",
+          neighborhood: "Al Olaya",
+          price: "$",
+          rating: 4.5,
+          cuisine: "Cafe",
+          coffee: "Desserts",
+          coords: [24.6978, 46.6812],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.5/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "8:00 AM - 1:00 AM (except Friday 1:30 PM - 1 AM)",
+            "Notes": "Great desserts and coffee in a cozy setting.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/XFvC2BBiYT31B9q1A"
+          }
+        },
+        {
+          name: "ORIGIN (The Lab)",
+          type: "cafe",
+          neighborhood: "Al Nakheel",
+          price: "$",
+          rating: 4.6,
+          cuisine: "Specialty Coffee",
+          coffee: "Specialty",
+          coords: [24.8145, 46.6532],
+          overview: {
+            "Cuisine": "Specialty Coffee",
+            "Google Rating": "4.6/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "6:00 AM - 11:30 PM (except Thursday & Friday until 12 AM)",
+            "Notes": "Specialty coffee with a focus on quality and innovation.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/sHfzq6pJmF22TveJ6"
+          }
+        },
+        {
+          name: "Atmospher",
+          type: "cafe",
+          neighborhood: "Al Yasmin",
+          price: "$",
+          rating: 4.4,
+          cuisine: "Cafe",
+          coffee: "Modern",
+          coords: [24.8076, 46.6778],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.4/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "6:00 AM - 1:00 AM (except Thursday & Friday until 2 AM)",
+            "Notes": "Modern café with a great atmosphere and drinks.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/xGZUcG41WxCoN9886"
+          }
+        },
+        {
+          name: "WATCHhow",
+          type: "cafe",
+          neighborhood: "Al Olaya",
+          price: "$",
+          rating: 4.3,
+          cuisine: "Cafe",
+          coffee: "Trendy",
+          coords: [24.6992, 46.6837],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.3/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "Monday: 8 AM to 11:30 PM · Tuesday to Thursday & Saturday to Sunday: 8 AM to 11 PM · Friday: 1 PM to 11:30 PM",
+            "Notes": "Trendy café with a unique concept.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/jQjF8z8kHhvrucCf8"
+          }
+        },
+        {
+          name: "Fav",
+          type: "cafe",
+          neighborhood: "Al Yasmin",
+          price: "$",
+          rating: 4.5,
+          cuisine: "Cafe",
+          coffee: "Modern",
+          coords: [24.8065, 46.6762],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.5/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "6:30 AM - 12:30 AM (except Friday 12:30 PM - 1 AM)",
+            "Notes": "Modern café with great coffee and atmosphere.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/cxT1VQA8eKTQ7zMY9"
+          }
+        },
+        {
+          name: "The Sift",
+          type: "cafe",
+          neighborhood: "Al Nakheel",
+          price: "$",
+          rating: 4.4,
+          cuisine: "Specialty Coffee",
+          coffee: "Specialty",
+          coords: [24.8138, 46.6543],
+          overview: {
+            "Cuisine": "Specialty Coffee",
+            "Google Rating": "4.4/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "6:00 AM - 11:30 PM (except Friday & Saturday until 12 AM)",
+            "Notes": "Specialty coffee with a focus on quality.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/3m1JvcoGx2MvA75t8"
+          }
+        },
+        {
+          name: "Green Bottle",
+          type: "cafe",
+          neighborhood: "Al Olaya",
+          price: "$",
+          rating: 4.3,
+          cuisine: "Cafe",
+          coffee: "Modern",
+          coords: [24.7005, 46.6851],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.3/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "7:00 AM - 12:30 AM (except Thursday until 2:30 AM, Friday 1 PM - 2:30 AM)",
+            "Notes": "Modern café with a focus on sustainability.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/2y38ovz9o9tNUgGc9"
+          }
+        },
+        {
+          name: "Quaint",
+          type: "cafe",
+          neighborhood: "Al Yasmin",
+          price: "$",
+          rating: 4.5,
+          cuisine: "Cafe",
+          coffee: "Trendy",
+          coords: [24.8054, 46.6753],
+          overview: {
+            "Cuisine": "Cafe",
+            "Google Rating": "4.5/5",
+            "Avg. Price (SAR)": "20–40",
+            "Hours": "7:00 AM - 1:00 AM (except Friday & Saturday until 2 AM)",
+            "Notes": "Trendy café with a cozy atmosphere.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/DHkERs6CPt1jMKp78"
+          }
+        }
+      ],
+      restaurants: [
+        {
+          name: "Signor Sassi",
+          type: "restaurant",
+          neighborhood: "As Sulimaniyah",
+          price: "$$$",
+          rating: 4.0,
+          cuisine: "Italian fine dining",
+          coords: [24.7000, 46.6900],
+          overview: {
+            "Cuisine": "Italian fine dining",
+            "Google Rating": "4.0/5",
+            "Avg. Price (SAR)": "200–300",
+            "Hours": "1:00 PM - 12:30 AM",
+            "Notes": "Offers a luxurious dining experience with authentic Italian cuisine.",
+            "Contact": "920011877"
+          },
+          reviews: [
+            "Best Italian food in Riyadh. – Rami"
+          ],
+          links: {
+            "Location": "https://maps.app.goo.gl/dGpDfo7GKnenYTpB6",
+            "Menu": "https://signorsassi.redro.menu/en/restaurant/riyadh/food.html",
+            "Reserve": "https://widget.servmeco.com/?oid=1233&source=venue_website"
+          }
+        },
+        {
+          name: "Public",
+          type: "restaurant",
+          neighborhood: "As Sulimaniyah",
+          price: "$$",
+          rating: 4.5,
+          cuisine: "Contemporary cuisine",
+          coords: [24.7010, 46.6910],
+          overview: {
+            "Cuisine": "Contemporary cuisine",
+            "Google Rating": "4.5/5",
+            "Avg. Price (SAR)": "150–250",
+            "Hours": "1:00 PM - 1:00 AM",
+            "Notes": "Offers modern dishes in a stylish setting.",
+            "Contact": "920024788"
+          },
+          reviews: [
+            "Fusion dishes are top-notch. – Laila"
+          ],
+          links: {
+            "Location": "https://maps.app.goo.gl/sLSXzuMY1LjkZdJh8",
+            "Menu": "https://thepublicrestaurant.com/wp-content/uploads/2025/02/Public-Menu.pdf",
+            "Reserve": "https://web.thechefz.co/reservation/web/create/17011689"
+          }
+        },
+        {
+          name: "Beefbar",
+          type: "restaurant",
+          neighborhood: "As Sulimaniyah",
+          price: "$$$",
+          rating: 3.8,
+          cuisine: "Steakhouse",
+          coords: [24.7020, 46.6920],
+          overview: {
+            "Cuisine": "Steakhouse",
+            "Google Rating": "3.8/5",
+            "Avg. Price (SAR)": "150–300",
+            "Hours": "1:00 AM - 12:00 AM (Thursday & Friday until 1 AM, closed Monday)",
+            "Notes": "Monaco-based steakhouse known for premium wagyu, crab tacos, and Art Deco ambiance.",
+            "Contact": "920004146"
+          },
+          reviews: [
+            "Steaks were juicy and perfect! – Khalid"
+          ],
+          links: {
+            "Location": "https://maps.app.goo.gl/Yg1XWA4eeBQ2ukou8",
+            "Menu": "https://beefbar.com/riyadh-menus/dinner/",
+            "Reserve": "https://widget.servmeco.com/?oid=1222&source=venue_website"
+          }
+        },
+        {
+          name: "Entrecôte Café de Paris",
+          type: "restaurant",
+          neighborhood: "Al Faisaliah",
+          price: "$$$",
+          rating: 3.7,
+          cuisine: "Swiss steakhouse",
+          coords: [24.7136, 46.6753],
+          overview: {
+            "Cuisine": "Swiss steakhouse",
+            "Google Rating": "3.7/5",
+            "Avg. Price (SAR)": "150–250",
+            "Hours": "Monday–Wednesday & Sunday: 1 PM to 12:30 AM · Thursday: 1 PM to 1:15 AM · Friday: 2 PM to 1:15 AM · Saturday: 2 PM to 12:30 AM",
+            "Notes": "Famous for its signature steak with secret sauce; located in Al Faisaliah Tower.",
+            "Contact": "9200 18998"
+          },
+          reviews: [
+            "Loved the secret sauce. – Mona"
+          ],
+          links: {
+            "Location": "https://maps.app.goo.gl/z1RiRZ2d2TgVogCm8",
+            "Menu": "https://entrecote.sa/en/menu",
+            "Reserve": "https://entrecote.sa/en/reservation/website/entrecote-faisaliah-tower/"
+          }
+        },
+        {
+          name: "Parker's",
+          type: "restaurant",
+          neighborhood: "Al Safarat",
+          price: "$$",
+          rating: 4.4,
+          cuisine: "Fusion cuisine",
+          coords: [24.6930, 46.6580],
+          overview: {
+            "Cuisine": "Fusion cuisine",
+            "Google Rating": "4.4/5",
+            "Avg. Price (SAR)": "100–200",
+            "Hours": "8:00 AM - 1:00 AM",
+            "Notes": "Known for truffle fries and Matilda Cake; elegant ambiance.",
+            "Contact": "920024788"
+          },
+          reviews: [
+            "International menu and great service. – Abdullah"
+          ],
+          links: {
+            "Location": "https://maps.app.goo.gl/TuWNCpSzh3A2U6nm7",
+            "Menu": "https://linktr.ee/parkersmenu",
+            "Reserve": "https://web.thechefz.co/reservation/web/create/5731723"
+          }
+        },
+        {
+          name: "Prego",
+          type: "restaurant",
+          neighborhood: "Al Olaya",
+          price: "$$$",
+          rating: 4.2,
+          cuisine: "Italian",
+          coords: [24.6985, 46.6842],
+          overview: {
+            "Cuisine": "Italian",
+            "Google Rating": "4.2/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "1:00 PM - 1:00 AM",
+            "Notes": "Authentic Italian cuisine in a stylish setting.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/oK17YtNfFoAhjKJ66"
+          }
+        },
+        {
+          name: "California Burger",
+          type: "restaurant",
+          neighborhood: "Al Nakheel",
+          price: "$",
+          rating: 4.3,
+          cuisine: "American",
+          coords: [24.8123, 46.6514],
+          overview: {
+            "Cuisine": "American",
+            "Google Rating": "4.3/5",
+            "Avg. Price (SAR)": "40–60",
+            "Hours": "1:00 PM - 2:00 AM",
+            "Notes": "Classic American burgers and fries.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/6atispsGGwRm4rqM7"
+          }
+        },
+        {
+          name: "Nashvilles Cuisine",
+          type: "restaurant",
+          neighborhood: "Al Yasmin",
+          price: "$",
+          rating: 4.1,
+          cuisine: "American",
+          coords: [24.8072, 46.6785],
+          overview: {
+            "Cuisine": "American",
+            "Google Rating": "4.1/5",
+            "Avg. Price (SAR)": "40–60",
+            "Hours": "1:30 PM - 2:00 AM (Thursday & Friday until 3 AM)",
+            "Notes": "American-style cuisine with a focus on Southern flavors.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/EiKJYzm5bbt7bweFA"
+          }
+        },
+        {
+          name: "Myazu",
+          type: "restaurant",
+          neighborhood: "Al Olaya",
+          price: "$$$",
+          rating: 4.5,
+          cuisine: "Japanese",
+          coords: [24.6972, 46.6825],
+          overview: {
+            "Cuisine": "Japanese",
+            "Google Rating": "4.5/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "1:00 PM - 12:00 AM (Thursday & Friday until 1 AM)",
+            "Notes": "Authentic Japanese cuisine with a modern twist.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/RXaEm7yiyHZ5Xx3g6"
+          }
+        },
+        {
+          name: "AOK",
+          type: "restaurant",
+          neighborhood: "Al Faisaliah",
+          price: "$$$",
+          rating: 4.4,
+          cuisine: "International",
+          coords: [24.7142, 46.6761],
+          overview: {
+            "Cuisine": "International",
+            "Google Rating": "4.4/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "8:00 AM - 10:00 PM (Friday & Saturday until 11 PM)",
+            "Notes": "International cuisine with a focus on quality ingredients.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/ANWss3N59SQHj6hB7"
+          }
+        },
+        {
+          name: "II Baretto",
+          type: "restaurant",
+          neighborhood: "Al Olaya",
+          price: "$$$",
+          rating: 4.3,
+          cuisine: "Italian",
+          coords: [24.6998, 46.6832],
+          overview: {
+            "Cuisine": "Italian",
+            "Google Rating": "4.3/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "12:30 PM - 12:00 AM",
+            "Notes": "Authentic Italian cuisine in a cozy setting.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/35YU4DfEraXhNDEb9"
+          }
+        },
+        {
+          name: "Los Bandidos Riyadh",
+          type: "restaurant",
+          neighborhood: "Al Yasmin",
+          price: "$$$",
+          rating: 4.2,
+          cuisine: "French, Italian, Spanish",
+          coords: [24.8063, 46.6774],
+          overview: {
+            "Cuisine": "French, Italian, Spanish",
+            "Google Rating": "4.2/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "12:00 PM - 12:00 AM (Friday 1 PM - 2 AM, Saturday 12 PM - 2 AM)",
+            "Notes": "European cuisine with a focus on Mediterranean flavors.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/VT9p3a3v9Sw3PBk19"
+          }
+        },
+        {
+          name: "Memos",
+          type: "restaurant",
+          neighborhood: "Al Nakheel",
+          price: "$$$",
+          rating: 4.3,
+          cuisine: "Italian",
+          coords: [24.8135, 46.6528],
+          overview: {
+            "Cuisine": "Italian",
+            "Google Rating": "4.3/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "12:00 PM - 12:00 AM (Wednesday, Thursday & Friday until 1 AM)",
+            "Notes": "Authentic Italian cuisine with a modern twist.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/U5p9zRpnwtu8D3RB7"
+          }
+        },
+        {
+          name: "Bagatelle",
+          type: "restaurant",
+          neighborhood: "Al Olaya",
+          price: "$$$",
+          rating: 4.5,
+          cuisine: "French",
+          coords: [24.6981, 46.6818],
+          overview: {
+            "Cuisine": "French",
+            "Google Rating": "4.5/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "1:00 PM - 12:00 AM (Thursday & Friday until 1 AM)",
+            "Notes": "Authentic French cuisine in an elegant setting.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/Yb7p1hZutfPZhZTTA"
+          }
+        },
+        {
+          name: "Crazy Pizza",
+          type: "restaurant",
+          neighborhood: "Al Yasmin",
+          price: "$$$",
+          rating: 4.1,
+          cuisine: "Italian",
+          coords: [24.8057, 46.6765],
+          overview: {
+            "Cuisine": "Italian",
+            "Google Rating": "4.1/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "1:00 PM - 12:00 AM (Thursday & Friday until 1 AM)",
+            "Notes": "Authentic Italian pizza with creative toppings.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/yZmqKUM1MqXZCeqM6"
+          }
+        },
+        {
+          name: "Cipriani",
+          type: "restaurant",
+          neighborhood: "Al Faisaliah",
+          price: "$$$",
+          rating: 4.6,
+          cuisine: "Italian",
+          coords: [24.7139, 46.6758],
+          overview: {
+            "Cuisine": "Italian",
+            "Google Rating": "4.6/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "1:00 PM - 12:30 AM",
+            "Notes": "Luxury Italian dining with impeccable service.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/C9hiZDvwmk8Jx5mg8"
+          }
+        },
+        {
+          name: "Santini",
+          type: "restaurant",
+          neighborhood: "Al Olaya",
+          price: "$$$",
+          rating: 4.4,
+          cuisine: "Italian",
+          coords: [24.6995, 46.6829],
+          overview: {
+            "Cuisine": "Italian",
+            "Google Rating": "4.4/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "1:00 PM - 12:00 AM (Thursday & Friday until 1 AM)",
+            "Notes": "Authentic Italian cuisine with a focus on fresh ingredients.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/st5Fc3RDzuuRQR358"
+          }
+        },
+        {
+          name: "Le Masho",
+          type: "restaurant",
+          neighborhood: "Al Yasmin",
+          price: "$$$",
+          rating: 4.3,
+          cuisine: "French",
+          coords: [24.8048, 46.6759],
+          overview: {
+            "Cuisine": "French",
+            "Google Rating": "4.3/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "2:30 PM - 12:30 AM",
+            "Notes": "Authentic French cuisine with a modern twist.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/VD5qBsdvVXvjC8SD6"
+          }
+        },
+        {
+          name: "San Carlo Cicchetti",
+          type: "restaurant",
+          neighborhood: "Al Nakheel",
+          price: "$$$",
+          rating: 4.5,
+          cuisine: "Italian",
+          coords: [24.8128, 46.6531],
+          overview: {
+            "Cuisine": "Italian",
+            "Google Rating": "4.5/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "1:00 PM - 1:00 AM",
+            "Notes": "Authentic Italian cuisine with a focus on sharing plates.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/YHoqfcwoC73UkRbh9"
+          }
+        },
+        {
+          name: "Morini Riyadh",
+          type: "restaurant",
+          neighborhood: "Al Olaya",
+          price: "$$$",
+          rating: 4.4,
+          cuisine: "New York-style Italian",
+          coords: [24.6979, 46.6815],
+          overview: {
+            "Cuisine": "New York-style Italian",
+            "Google Rating": "4.4/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "7:00 AM - 11:00 AM, 12:00 PM - 12:00 AM",
+            "Notes": "New York-style Italian cuisine with a modern twist.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/rgzMVFiXkNBxXTaA7"
+          }
+        },
+        {
+          name: "Sumosan",
+          type: "restaurant",
+          neighborhood: "Al Yasmin",
+          price: "$$$",
+          rating: 4.6,
+          cuisine: "Japanese",
+          coords: [24.8039, 46.6752],
+          overview: {
+            "Cuisine": "Japanese",
+            "Google Rating": "4.6/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "1:00 PM - 12:00 AM (Thursday & Friday until 1 AM)",
+            "Notes": "Authentic Japanese cuisine with a focus on sushi and sashimi.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/KBYSUp4VLJRzD6in7"
+          }
+        },
+        {
+          name: "La Petite Maison (LPM) Riyadh",
+          type: "restaurant",
+          neighborhood: "Al Faisaliah",
+          price: "$$$",
+          rating: 4.7,
+          cuisine: "French",
+          coords: [24.7145, 46.6764],
+          overview: {
+            "Cuisine": "French",
+            "Google Rating": "4.7/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "12:30–3:30 PM, 6:30–11:30 PM (Thursday: 12:30–4 PM, 6:30–11:30 PM)",
+            "Notes": "Authentic French cuisine with a focus on Mediterranean flavors.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/7TKpushG8RtUrvQJ8"
+          }
+        },
+        {
+          name: "MR CHOW Riyadh",
+          type: "restaurant",
+          neighborhood: "Al Nakheel",
+          price: "$$$",
+          rating: 4.3,
+          cuisine: "Chinese",
+          coords: [24.8121, 46.6525],
+          overview: {
+            "Cuisine": "Chinese",
+            "Google Rating": "4.3/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "12:00 PM - 11:30 PM",
+            "Notes": "Authentic Chinese cuisine with a modern twist.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/8vqNZBkYAWVgpagDA"
+          }
+        },
+        {
+          name: "MNKY HSE",
+          type: "restaurant",
+          neighborhood: "Al Yasmin",
+          price: "$$$",
+          rating: 4.2,
+          cuisine: "Latin American",
+          coords: [24.8042, 46.6756],
+          overview: {
+            "Cuisine": "Latin American",
+            "Google Rating": "4.2/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "6:30 PM–1 AM (Thursday & Friday until 2 AM, closed Sunday)",
+            "Notes": "Latin American cuisine with a focus on bold flavors.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/x4W3LsRjxebLw6Pr9"
+          }
+        },
+        {
+          name: "Oulu",
+          type: "restaurant",
+          neighborhood: "Al Olaya",
+          price: "$$$",
+          rating: 4.4,
+          cuisine: "Italian",
+          coords: [24.6988, 46.6822],
+          overview: {
+            "Cuisine": "Italian",
+            "Google Rating": "4.4/5",
+            "Avg. Price (SAR)": "200+",
+            "Hours": "1:00 PM - 1:00 AM (Thursday & Friday until 2 AM)",
+            "Notes": "Authentic Italian cuisine with a modern twist.",
+            "Contact": ""
+          },
+          reviews: [],
+          links: {
+            "Location": "https://maps.app.goo.gl/9M5yapYhaP2Vw3xW9"
+          }
+        }
+      ],
+      events: [
+        {
+          name: "The Saudi Food Show",
+          type: "event",
+          category: "Food",
+          coords: [24.8034, 46.6572],
+          date: "2025-05-12T00:00:00",
+          overview: {
+            "Dates": "May 12–14, 2025",
+            "Venue": "Riyadh Front Exhibition & Conference Centre",
+            "Ticket Price (SAR)": "150 (3-day pass)",
+            "Hours": "2:00 PM - 10:00 PM",
+            "Notes": "The largest F&B sourcing event in Saudi Arabia, uniting global industry players."
+          },
+          description: "Showcasing the best food from around the world.",
+          links: {
+            "Location": "https://maps.app.goo.gl/PyGnen7vPcfF4YAL8",
+            "Contact": "https://www.thesaudifoodshow.com/contact"
+          }
+        },
+        {
+          name: "Smart Data & AI Summit",
+          type: "event",
+          category: "Lifestyle",
+          coords: [24.7538, 46.6525],
+          date: "2025-05-05T00:00:00",
+          overview: {
+            "Dates": "May 5–6, 2025",
+            "Venue": "JW Marriott Hotel Riyadh",
+            "Ticket Price (SAR)": "Free!",
+            "Hours": "9:00 AM - 6:00 PM",
+            "Notes": "A premier gathering of over 300 data and AI professionals."
+          },
+          description: "The region's largest data & AI conference.",
+          links: {
+            "Location": "https://maps.app.goo.gl/QevWrwNShHQgZRbGA",
+            "Contact": "0115117777"
+          }
+        },
+        {
+          name: "Global Project Management Forum (GPMF)",
+          type: "event",
+          category: "Lifestyle",
+          coords: [24.6620, 46.6740],
+          date: "2025-05-17T00:00:00",
+          overview: {
+            "Dates": "May 17–19, 2025",
+            "Venue": "Fairmont Hotel, Riyadh",
+            "Ticket Price (SAR)": "Free (Forum & Exhibition), 1000 + VAT (Workshops & Masterclasses)",
+            "Hours": "Time not specified",
+            "Notes": "The largest project management forum in the MENA region."
+          },
+          description: "Global thought-leadership in project management.",
+          links: {
+            "Location": "https://maps.app.goo.gl/1ggjkq7ZKhiWxKY89",
+            "Contact": "+966 54 409 6764"
+          }
+        },
+        {
+          name: "Canelo Alvarez vs. William Scull – Fatal Fury PPV",
+          type: "event",
+          category: "Sports",
+          coords: [24.7230, 46.6700],
+          date: "2025-05-03T00:00:00",
+          overview: {
+            "Dates": "May 3, 2025",
+            "Venue": "ANB Arena, Riyadh",
+            "Ticket Price (SAR)": "80 - 800",
+            "Hours": "Time not specified",
+            "Notes": "A super-middleweight title unification bout."
+          },
+          description: "The biggest boxing event of the year.",
+          links: {
+            "Location": "",
+            "Contact": "920035043"
+          }
+        },
+        {
+          name: "Saudi Entertainment & Amusement Expo 2025",
+          type: "event",
+          category: "Expo",
+          coords: [24.8034, 46.6572],
+          date: "2025-05-20T00:00:00",
+          overview: {
+            "Dates": "May 20–22, 2025",
+            "Venue": "Riyadh Front Exhibition & Conference Centre",
+            "Ticket Price (SAR)": "Free!",
+            "Hours": "3:00 PM - 9:00 PM",
+            "Notes": "The region's leading platform for the entertainment and amusement industry."
+          },
+          description: "Discover the future of entertainment and amusement industries.",
+          links: {
+            "Location": "https://maps.app.goo.gl/1xdPicmawR7HwPBb8",
+            "Contact": "marketing@saudientertainmentexpo.com"
+          }
+        }
+      ]
+    };
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize favorites from localStorage
+      initFavorites();
+      
+      // Render all cards
+      renderCards();
+      
+      // Initialize map
+      initMap();
+      
+      // Set up filter functionality
+      setupFilters();
+      
+      // Set up quick filters
+      setupQuickFilters();
+      
+      // Set up navigation
+      setupNavigation();
+      
+      // Update countdowns
+      updateCountdowns();
+      setInterval(updateCountdowns, 1000);
+      
+      // Set up theme toggle
+      setupThemeToggle();
+      
+      // Set up newsletter form
+      setupNewsletter();
+    });
+
+    // Initialize favorites
+    function initFavorites() {
+      if (!localStorage.getItem('favorites')) {
+        localStorage.setItem('favorites', JSON.stringify([]));
+      }
+    }
+
+    // Get favorites
+    function getFavorites() {
+      return JSON.parse(localStorage.getItem('favorites'));
+    }
+
+    // Save favorites
+    function saveFavorites(favorites) {
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
+
+    // Toggle favorite
+    function toggleFavorite(type, name) {
+      const favorites = getFavorites();
+      const index = favorites.findIndex(fav => fav.type === type && fav.name === name);
+      
+      if (index === -1) {
+        favorites.push({ type, name });
+      } else {
+        favorites.splice(index, 1);
+      }
+      
+      saveFavorites(favorites);
+      renderFavorites();
+    }
+
+    // Check if item is favorite
+    function isFavorite(type, name) {
+      const favorites = getFavorites();
+      return favorites.some(fav => fav.type === type && fav.name === name);
+    }
+
+    // Render favorites
+    function renderFavorites() {
+      const favoritesList = document.getElementById('favorites-list');
+      favoritesList.innerHTML = '';
+      
+      const favorites = getFavorites();
+      
+      if (favorites.length === 0) {
+        favoritesList.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-light);">No favorites yet. Click the heart icon on any venue or event to add it here.</p>';
+        return;
+      }
+      
+      favorites.forEach(fav => {
+        let item;
+        if (fav.type === 'cafe') {
+          item = data.cafes.find(cafe => cafe.name === fav.name);
+        } else if (fav.type === 'restaurant') {
+          item = data.restaurants.find(restaurant => restaurant.name === fav.name);
+        } else {
+          item = data.events.find(event => event.name === fav.name);
+        }
+        
+        if (item) {
+          const card = createCard(item);
+          card.querySelector('.favorite-btn').classList.add('active');
+          favoritesList.appendChild(card);
+        }
+      });
+    }
+
+    // Render all cards
+    function renderCards(filteredData = null) {
+      const cafesList = document.getElementById('cafes-list');
+      const restaurantsList = document.getElementById('restaurants-list');
+      const eventsList = document.getElementById('events-list');
+      
+      // Clear existing cards
+      cafesList.innerHTML = '';
+      restaurantsList.innerHTML = '';
+      eventsList.innerHTML = '';
+      
+      // Get data to render (filtered or all)
+      const cafesData = filteredData ? filteredData.cafes : data.cafes;
+      const restaurantsData = filteredData ? filteredData.restaurants : data.restaurants;
+      const eventsData = filteredData ? filteredData.events : data.events;
+      
+      // Render café cards
+      cafesData.forEach(cafe => {
+        cafesList.appendChild(createCard(cafe));
+      });
+      
+      // Render restaurant cards
+      restaurantsData.forEach(restaurant => {
+        restaurantsList.appendChild(createCard(restaurant));
+      });
+      
+      // Render event cards
+      eventsData.forEach(event => {
+        eventsList.appendChild(createCard(event));
+      });
+      
+      // Update map markers
+      updateMapMarkers();
+    }
+
+    // Create a card element
+    function createCard(item) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.type = item.type;
+      card.dataset.name = item.name;
+      if (item.neighborhood) card.dataset.neighborhood = item.neighborhood;
+      if (item.price) card.dataset.price = item.price;
+      if (item.rating) card.dataset.rating = item.rating;
+      if (item.cuisine) card.dataset.cuisine = item.cuisine;
+      if (item.coffee) card.dataset.coffee = item.coffee;
+      if (item.category) card.dataset.category = item.category;
+      if (item.coords) card.dataset.coords = item.coords.join(',');
+      if (item.date) card.dataset.date = item.date;
+      
+      // Favorite button
+      const favoriteBtn = document.createElement('button');
+      favoriteBtn.className = 'favorite-btn';
+      if (isFavorite(item.type, item.name)) {
+        favoriteBtn.classList.add('active');
+      }
+      favoriteBtn.innerHTML = '<i class="fas fa-heart"></i>';
+      favoriteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFavorite(item.type, item.name);
+        favoriteBtn.classList.toggle('active');
+      });
+      
+      // Card header
+      const cardHeader = document.createElement('div');
+      cardHeader.className = 'card-header';
+      
+      const cardTitle = document.createElement('h3');
+      cardTitle.className = 'card-title';
+      cardTitle.textContent = item.name;
+      
+      const cardTag = document.createElement('span');
+      cardTag.className = 'card-tag';
+      if (item.type === 'cafe') {
+        cardTag.textContent = 'Café';
+      } else if (item.type === 'restaurant') {
+        cardTag.textContent = 'Restaurant';
+      } else {
+        cardTag.textContent = 'Event';
+      }
+      
+      cardHeader.appendChild(cardTitle);
+      cardHeader.appendChild(cardTag);
+      cardHeader.appendChild(favoriteBtn);
+      
+      // Card body
+      const cardBody = document.createElement('div');
+      cardBody.className = 'card-body';
+      const table = document.createElement('table');
+      table.className = 'card-table';
+      for (const [key, value] of Object.entries(item.overview)) {
+        const row = document.createElement('tr');
+        const th = document.createElement('th');
+        th.textContent = key;
+        const td = document.createElement('td');
+        td.textContent = value;
+        row.appendChild(th);
+        row.appendChild(td);
+        table.appendChild(row);
+      }
+      cardBody.appendChild(table);
+      if (item.rating) {
+        const ratingDiv = document.createElement('div');
+        ratingDiv.className = 'card-rating';
+        for (let i = 1; i <= 5; i++) {
+          const star = document.createElement('span');
+          star.className = 'star' + (i <= Math.round(item.rating) ? '' : ' inactive');
+          star.innerHTML = '★';
+          ratingDiv.appendChild(star);
+        }
+        cardBody.appendChild(ratingDiv);
+      }
+      if (item.reviews && item.reviews.length > 0) {
+        const reviewsTitle = document.createElement('p');
+        reviewsTitle.textContent = 'Reviews:';
+        reviewsTitle.style.marginTop = '1rem';
+        reviewsTitle.style.fontWeight = '500';
+        cardBody.appendChild(reviewsTitle);
+        const reviewsList = document.createElement('ul');
+        reviewsList.className = 'card-reviews';
+        item.reviews.forEach(review => {
+          const li = document.createElement('li');
+          li.textContent = review;
+          reviewsList.appendChild(li);
+        });
+        cardBody.appendChild(reviewsList);
+      }
+        if (item.date) {
+        const countdown = document.createElement('div');
+        countdown.className = 'countdown';
+        countdown.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span class="countdown-text"></span>
+        `;
+        cardBody.appendChild(countdown);
+      }
+      const socialShare = document.createElement('div');
+      socialShare.className = 'social-share';
+      const instagramBtn = document.createElement('a');
+      instagramBtn.className = 'social-btn instagram';
+      instagramBtn.innerHTML = '<i class="fab fa-instagram"></i>';
+      instagramBtn.href = `https://www.instagram.com/`;
+      instagramBtn.target = '_blank';
+      socialShare.appendChild(instagramBtn);
+      cardBody.appendChild(socialShare);
+      const cardFooter = document.createElement('div');
+      cardFooter.className = 'card-footer';
+      const locationDiv = document.createElement('div');
+      locationDiv.className = 'card-location';
+      locationDiv.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+        ${item.overview.Venue || item.neighborhood}
+      `;
+      cardFooter.appendChild(locationDiv);
+      const buttonsDiv = document.createElement('div');
+      buttonsDiv.className = 'card-buttons';
+      if (item.coords) {
+        const mapLink = document.createElement('a');
+        mapLink.className = 'card-btn secondary';
+        mapLink.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          Map
+        `;
+        mapLink.href = `https://maps.google.com/?q=${item.coords[0]},${item.coords[1]}`;
+        mapLink.target = '_blank';
+        buttonsDiv.appendChild(mapLink);
+      }
+      for (const [text, url] of Object.entries(item.links)) {
+        if (text !== 'Contact') { // Skip contact links as they're in the overview
+          const link = document.createElement('a');
+          link.className = 'card-btn';
+          link.textContent = text;
+          link.href = url;
+          link.target = '_blank';
+          buttonsDiv.appendChild(link);
+        }
+      }
+      cardFooter.appendChild(buttonsDiv);
+      card.appendChild(cardHeader);
+      card.appendChild(cardBody);
+      card.appendChild(cardFooter);
+      return card;
+    }
+    function initMap() {
+      const map = L.map('map').setView([24.7136, 46.6753], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+      window.riyadhMap = map;
+    }
+    function updateMapMarkers() {
+      const map = window.riyadhMap;
+      if (window.mapMarkers) {
+        window.mapMarkers.forEach(marker => map.removeLayer(marker));
+      }
+      window.mapMarkers = [];
+      const cards = document.querySelectorAll('.card:not([style*="display: none"])[data-coords]');
+      cards.forEach(card => {
+        const coords = card.dataset.coords.split(',').map(Number);
+        const name = card.dataset.name;
+        const type = card.dataset.type;
+        let markerColor;
+        if (type === 'cafe') markerColor = '#0ea5e9';
+        else if (type === 'restaurant') markerColor = '#f97316';
+        else markerColor = '#8b5cf6';
+        const marker = L.marker(coords, {
+          icon: L.divIcon({
+            className: 'custom-marker',
+            html: `
+              <div style="
+                width: 24px;
+                height: 24px;
+                background-color: ${markerColor};
+                border-radius: 50%;
+                border: 2px solid white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+              ">
+                ${type === 'cafe' ? '☕' : type === 'restaurant' ? '🍽️' : '🎉'}
+              </div>
+            `,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+          })
+        }).addTo(map);
+          marker.bindPopup(`
+          <div style="font-weight: 500; font-size: 14px;">
+            <div style="color: ${markerColor}; margin-bottom: 4px;">${type.charAt(0).toUpperCase() + type.slice(1)}</div>
+            <div style="font-size: 16px; font-weight: 600;">${name}</div>
+          </div>
+        `);
+        window.mapMarkers.push(marker);
+        marker.on('click', function() {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          card.style.boxShadow = '0 0 0 3px var(--accent)';
+          setTimeout(() => {
+            card.style.boxShadow = '';
+          }, 2000);
+        });
+      });
+        if (cards.length > 0) {
+        const group = new L.featureGroup(window.mapMarkers);
+        map.fitBounds(group.getBounds().pad(0.2));
+      } else {
+        map.setView([24.7136, 46.6753], 12);
+      }
+    }
+    function setupFilters() {
+      const applyBtn = document.getElementById('apply-btn');
+      const clearBtn = document.getElementById('clear-btn');
+      const searchBtn = document.getElementById('search-btn');
+      const searchInput = document.getElementById('search-input');
+      applyBtn.addEventListener('click', applyFilters);
+      searchBtn.addEventListener('click', applyFilters);
+      searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') applyFilters();
+      });
+      clearBtn.addEventListener('click', clearFilters);
+    }
+    function setupQuickFilters() {
+      const quickFilters = document.querySelectorAll('.quick-filter');
+      quickFilters.forEach(filter => {
+        filter.addEventListener('click', function() {
+          quickFilters.forEach(f => f.classList.remove('active'));
+          
+          this.classList.add('active');
+          const filterType = this.dataset.filter;
+          clearFilters();
+          switch(filterType) {
+            case 'top-rated':
+              document.getElementById('filter-rating').value = '4.5';
+              break;
+            case 'budget':
+              document.getElementById('filter-price').value = '$';
+              break;
+            case 'new':
+              document.getElementById('filter-neighborhood').value = 'Al Yasmin';
+              break;
+            case 'events':
+              document.getElementById('filter-type').value = 'event';
+              break;
+            case 'coffee':
+              document.getElementById('filter-type').value = 'cafe';
+              document.getElementById('filter-coffee').value = 'Specialty';
+              break;
+          }          
+          applyFilters();
+        });
+      });
+    }
+    function setupNavigation() {
+      const navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          document.querySelectorAll('.section').forEach(section => {
+            section.style.display = 'none';
+          });
+          const target = this.getAttribute('href');
+          if (target === '#favorites') {
+            document.getElementById('favorites').style.display = 'block';
+            renderFavorites();
+          } else {
+            document.querySelector(target).style.display = 'block';
+          }
+          navLinks.forEach(link => link.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+    }
+    function setupThemeToggle() {
+      const themeToggle = document.getElementById('theme-toggle');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+      }
+      themeToggle.addEventListener('click', function() {
+        if (document.documentElement.getAttribute('data-theme') === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'light');
+          localStorage.setItem('theme', 'light');
+          themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          localStorage.setItem('theme', 'dark');
+          themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+      });
+    }
+    function setupNewsletter() {
+      const newsletterForm = document.getElementById('newsletter-form');
+      newsletterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = this.querySelector('input').value;
+        alert(`Thank you for subscribing with ${email}! You'll receive updates about Riyadh's best venues and events.`);
+        this.reset();
+      });
+    }
+    function applyFilters() {
+      const neighborhood = document.getElementById('filter-neighborhood').value;
+      const type = document.getElementById('filter-type').value;
+      const price = document.getElementById('filter-price').value;
+      const rating = document.getElementById('filter-rating').value;
+      const cuisine = document.getElementById('filter-cuisine').value;
+      const coffee = document.getElementById('filter-coffee').value;
+      const eventCategory = document.getElementById('filter-event-category').value;
+      const searchText = document.getElementById('search-input').value.trim().toLowerCase();
+      const filteredData = {
+        cafes: data.cafes.filter(cafe => filterItem(cafe, neighborhood, type, price, rating, cuisine, coffee, eventCategory, searchText)),
+        restaurants: data.restaurants.filter(restaurant => filterItem(restaurant, neighborhood, type, price, rating, cuisine, coffee, eventCategory, searchText)),
+        events: data.events.filter(event => filterItem(event, neighborhood, type, price, rating, cuisine, coffee, eventCategory, searchText))
+      };
+      renderCards(filteredData);
+      updateActiveFilters();
+    }
+    function filterItem(item, neighborhood, type, price, rating, cuisine, coffee, eventCategory, searchText) {
+      if (type && item.type !== type) return false;
+            if (neighborhood && item.neighborhood !== neighborhood) return false;
+      if (price && item.price !== price) return false;
+      if (rating && item.rating < parseFloat(rating)) return false;
+        if (cuisine && item.cuisine !== cuisine) {
+        if (item.cuisine && typeof item.cuisine === 'string' && item.cuisine.includes(',')) {
+          if (!item.cuisine.split(',').map(c => c.trim()).includes(cuisine)) return false;
+        } else if (item.cuisine !== cuisine) {
+          return false;
+        }
+      }
+            if (coffee && item.coffee !== coffee) return false;
+            if (eventCategory && item.category !== eventCategory) return false;
+            if (searchText) {
+        const searchFields = [
+          item.name,
+          item.neighborhood || '',
+          item.cuisine || '',
+          item.coffee || '',
+          item.category || '',
+          item.description || '',
+          ...Object.values(item.overview).map(String)
+        ].join(' ').toLowerCase();
+        
+        if (!searchFields.includes(searchText)) return false;
+      }
+      return true;
+    }
+    function clearFilters() {
+      document.getElementById('filter-neighborhood').value = '';
+      document.getElementById('filter-type').value = '';
+      document.getElementById('filter-price').value = '';
+      document.getElementById('filter-rating').value = '';
+      document.getElementById('filter-cuisine').value = '';
+      document.getElementById('filter-coffee').value = '';
+      document.getElementById('filter-event-category').value = '';
+      document.getElementById('search-input').value = '';
+            document.querySelectorAll('.quick-filter').forEach(filter => {
+        filter.classList.remove('active');
+      });
+            renderCards();
+            document.getElementById('active-filters').innerHTML = '';
+    }
+    function updateActiveFilters() {
+      const activeFiltersDiv = document.getElementById('active-filters');
+      activeFiltersDiv.innerHTML = '';
+      const filters = [
+        { id: 'filter-neighborhood', label: 'Neighborhood' },
+        { id: 'filter-type', label: 'Type' },
+        { id: 'filter-price', label: 'Price' },
+        { id: 'filter-rating', label: 'Min Rating' },
+        { id: 'filter-cuisine', label: 'Cuisine' },
+        { id: 'filter-coffee', label: 'Coffee Type' },
+        { id: 'filter-event-category', label: 'Event Category' }
+      ];
+      const searchText = document.getElementById('search-input').value.trim();
+            filters.forEach(filter => {
+        const select = document.getElementById(filter.id);
+        if (select.value) {
+          const chip = document.createElement('div');
+          chip.className = 'filter-chip';
+          
+          let displayValue = select.value;
+          if (select.selectedIndex >= 0) {
+            displayValue = select.options[select.selectedIndex].text;
+          }
+          
+          chip.innerHTML = `${filter.label}: ${displayValue} <button>&times;</button>`;
+          
+          chip.addEventListener('click', () => {
+            select.value = '';
+            applyFilters();
+          });
+          
+          activeFiltersDiv.appendChild(chip);
+        }
+      });
+            if (searchText) {
+        const chip = document.createElement('div');
+        chip.className = 'filter-chip';
+        chip.innerHTML = `Search: "${searchText}" <button>&times;</button>`;
+        
+        chip.addEventListener('click', () => {
+          document.getElementById('search-input').value = '';
+          applyFilters();
+        });
+        activeFiltersDiv.appendChild(chip);
+      }
+    }
+    function updateCountdowns() {
+      const now = new Date();
+      
+      document.querySelectorAll('.countdown .countdown-text').forEach(countdownEl => {
+        const card = countdownEl.closest('.card');
+        const dateStr = card.dataset.date;
+        
+        if (!dateStr) return;
+        
+        const eventDate = new Date(dateStr);
+        const diff = eventDate - now;
+        
+        if (diff <= 0) {
+          countdownEl.textContent = 'Event is happening now!';
+          return;
+        }
+        
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        countdownEl.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      });
+    }
+  </script>
+  <script>
+    function getActiveFilters() {
+      return {
+        neighborhood: document.getElementById("filter-neighborhood").value.trim(),
+        type: document.getElementById("filter-type").value.trim(),
+        price: document.getElementById("filter-price").value.trim(),
+        rating: document.getElementById("filter-rating").value.trim(),
+        cuisine: document.getElementById("filter-cuisine").value.trim(),
+        coffee: document.getElementById("filter-coffee").value.trim(),
+        eventCategory: document.getElementById("filter-event-category").value.trim(),
+        searchQuery: document.getElementById("search-input").value.trim().toLowerCase()
+      };
+    }
+    function matchesSearch(item, filters) {
+      if (!filters.searchQuery) return true;
+      const fields = [
+        item.name,
+        item.neighborhood,
+        item.cuisine,
+        item.overview?.Notes || ""
+      ];
+      return fields.some(field => field.toLowerCase().includes(filters.searchQuery));
+    }
+    function matchesFilters(item, filters) {
+      if (filters.neighborhood && item.neighborhood !== filters.neighborhood) return false;
+      if (filters.price && item.price !== filters.price) return false;
+      if (filters.rating && item.rating < parseFloat(filters.rating)) return false;
+      if (filters.cuisine && item.cuisine !== filters.cuisine) return false;
+      if (filters.coffee && item.coffee !== filters.coffee) return false;
+      if (filters.type && item.type !== filters.type) return false;
+      if (filters.type === "event" && item.type !== "event") return false;
+      if (item.type === "event" && filters.eventCategory && item.category !== filters.eventCategory) return false;
+      return true;
+    }
+    function filterAndShowAll() {
+      const filters = getActiveFilters();
+        data.cafes.forEach((cafe, index) => {
+        const card = document.querySelector(`#cafes-list .card:nth-child(${index + 1})`);
+        if (card) {
+          const visible = matchesFilters(cafe, filters) && matchesSearch(cafe, filters);
+          card.style.display = visible ? "block" : "none";
+        }
+      });
+        data.restaurants.forEach((restaurant, index) => {
+        const card = document.querySelector(`#restaurants-list .card:nth-child(${index + 1})`);
+        if (card) {
+          const visible = matchesFilters(restaurant, filters) && matchesSearch(restaurant, filters);
+          card.style.display = visible ? "block" : "none";
+        }
+      });
+      if (data.events) {
+        data.events.forEach((event, index) => {
+          const card = document.querySelector(`#events-list .card:nth-child(${index + 1})`);
+          if (card) {
+            const visible = matchesFilters(event, filters) && matchesSearch(event, filters);
+            card.style.display = visible ? "block" : "none";
+          }
+        });
+      }
+    }
+      document.getElementById("apply-btn").addEventListener("click", filterAndShowAll);
+    document.getElementById("search-btn").addEventListener("click", filterAndShowAll);
+    document.getElementById("search-input").addEventListener("keyup", function (e) {
+      if (e.key === "Enter") filterAndShowAll();
+    });
+      document.getElementById("clear-btn").addEventListener("click", function () {
+      document.getElementById("filter-neighborhood").value = "";
+      document.getElementById("filter-type").value = "";
+      document.getElementById("filter-price").value = "";
+      document.getElementById("filter-rating").value = "";
+      document.getElementById("filter-cuisine").value = "";
+      document.getElementById("filter-coffee").value = "";
+      document.getElementById("filter-event-category").value = "";
+      document.getElementById("search-input").value = "";
+      filterAndShowAll();
+    });
+    window.addEventListener("DOMContentLoaded", filterAndShowAll);
+  </script>  
+</body>
+</html>
