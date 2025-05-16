@@ -734,50 +734,51 @@
       color: #ff6b6b;
     }
 
-
     .open-status {
-  position: absolute;
-  top: 16px;
-  right: 56px; /* Next to favorite button */
-  padding: 4px 12px;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  animation: fadeIn 0.3s ease-out;
-  box-shadow: var(--shadow);
-}
-
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 5px 12px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: fadeIn 0.3s ease-out;
+      box-shadow: var(--shadow-lg);
+    }
 
     .open-status.open {
-      background-color: rgba(16, 185, 129, 0.1);
+      background-color: rgba(16, 185, 129, 0.15);
       color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
     .open-status.closed {
-      background-color: rgba(239, 68, 68, 0.1);
+      background-color: rgba(239, 68, 68, 0.15);
       color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
 
     .card-distance {
       position: absolute;
       top: 16px;
-      left: 110px;
-      padding: 4px 12px;
+      left: 16px;
+      padding: 5px 12px;
       border-radius: 9999px;
       font-size: 0.75rem;
       font-weight: 600;
       z-index: 2;
-      background-color: rgba(59, 130, 246, 0.1);
+      background-color: rgba(59, 130, 246, 0.15);
       color: var(--info);
       display: none;
       align-items: center;
       gap: 4px;
       animation: fadeIn 0.3s ease-out;
       box-shadow: var(--shadow);
+      border: 1px solid rgba(59, 130, 246, 0.3);
     }
 
     .card-distance.visible {
@@ -788,6 +789,7 @@
       padding: 20px;
       border-bottom: 1px solid #f3f4f6;
       position: relative;
+      margin-top: 10px;
     }
 
     .card-title {
@@ -3134,29 +3136,10 @@
     function calculateDistances() {
       if (!userLocation) return;
       
-      // Function to calculate distance between two coordinates in km
-      function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-        const R = 6371; // Radius of the earth in km
-        const dLat = deg2rad(lat2 - lat1);
-        const dLon = deg2rad(lon2 - lon1); 
-        const a = 
-          Math.sin(dLat/2) * Math.sin(dLat/2) +
-          Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
-          Math.sin(dLon/2) * Math.sin(dLon/2)
-          ; 
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-        const d = R * c; // Distance in km
-        return d;
-      }
-      
-      function deg2rad(deg) {
-        return deg * (Math.PI/180)
-      }
-      
       // Calculate and store distances for each venue
       [...data.cafes, ...data.restaurants, ...data.events].forEach(venue => {
         if (venue.coords) {
-          venue.distance = getDistanceFromLatLonInKm(
+          venue.distance = calculateDistance(
             userLocation[0], userLocation[1],
             venue.coords[0], venue.coords[1]
           );
@@ -3166,7 +3149,7 @@
       // Update distance displays on cards
       document.querySelectorAll('.card[data-coords]').forEach(card => {
         const coords = card.dataset.coords.split(',').map(Number);
-        const distance = getDistanceFromLatLonInKm(
+        const distance = calculateDistance(
           userLocation[0], userLocation[1],
           coords[0], coords[1]
         );
@@ -3261,33 +3244,38 @@
       });
     }
 
-    // Check if a venue is currently open - improved with Riyadh time
+    // Check if a venue is currently open - precisely matched to Riyadh time
     function isOpenNow(venue) {
       if (!venue.overview || !venue.overview.Hours) return false;
 
-      // Get current time info in Riyadh (UTC+3)
+      // Get current time in Riyadh (UTC+3)
       const now = new Date();
       
-      // Convert to Riyadh time (UTC+3)
-      const riyadhTime = new Date(now.getTime() + (3 * 60 * 60 * 1000 - now.getTimezoneOffset() * 60 * 1000));
+      // Calculate the offset between local time and Riyadh time
+      const riyadhOffset = 3 * 60; // Riyadh is UTC+3 (3 hours * 60 minutes)
+      const localOffset = -now.getTimezoneOffset(); // Local offset in minutes
+      const offsetDiff = riyadhOffset - localOffset; // Difference in minutes
+      
+      // Create a new date object with Riyadh time
+      const riyadhTime = new Date(now.getTime() + offsetDiff * 60 * 1000);
+      
       const dayOfWeek = riyadhTime.getDay(); // 0 = Sunday, 1 = Monday, etc.
       const hour = riyadhTime.getHours();
       const minute = riyadhTime.getMinutes();
       const currentTime = hour + minute / 60; // Convert to decimal hours
 
-      // Parse the hours string
       const hoursText = venue.overview.Hours;
       
-      // Check if it's "Open 24 hours"
+      // Check for "Open 24 hours"
       if (hoursText.toLowerCase().includes('open 24')) {
-        // Check if there's an exception for today
+        // Check for day-specific exceptions
         const daysMap = {
           'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 
           'Friday': 5, 'Saturday': 6, 'Sunday': 0
         };
         
+        // Check if today is mentioned as an exception
         for (const [day, dayNum] of Object.entries(daysMap)) {
-          // Check if today is mentioned as an exception
           if (dayOfWeek === dayNum && 
               hoursText.toLowerCase().includes(`except ${day.toLowerCase()}`)) {
             // This is an exception day - need to check the exception hours
@@ -3302,50 +3290,132 @@
           }
         }
         
-        return true; // 24 hours open and no exception for today
+        return true; // Open 24 hours and no exception for today
       }
       
-      // Check if today has special hours
-      let todayHours = hoursText;
+      // Handle day-specific hours
       const daysMap = {
         'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 
         'Friday': 5, 'Saturday': 6, 'Sunday': 0
       };
       
-      // Look for day-specific patterns
-      for (const [day, dayNum] of Object.entries(daysMap)) {
-        if (dayOfWeek === dayNum && hoursText.includes(day)) {
-          // Extract this day's hours
-          const dayPattern = new RegExp(`${day}[^\\d]+(\\d+(?::\\d+)?\\s*(?:AM|PM)[^\\d]+\\d+(?::\\d+)?\\s*(?:AM|PM))`, 'i');
-          const match = hoursText.match(dayPattern);
-          if (match) {
-            todayHours = match[1];
+      // Days of the week in abbreviated form for regex matching
+      const daysShort = {
+        'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 
+        'Fri': 5, 'Sat': 6, 'Sun': 0
+      };
+      
+      // First, check for day-specific formatting patterns (e.g., "Monday: 8 AM to 11:30 PM")
+      let todayHours = null;
+      
+      // Handle day ranges like "Monday–Wednesday: 1 PM to 12:30 AM"
+      const dayRangePattern = /([a-zA-Z]+)(?:\s*(?:to|-|–)\s*([a-zA-Z]+))?\s*(?:&\s*(?:[a-zA-Z]+))?\s*:\s*([\d:]+\s*(?:AM|PM)[^,;]*?[\d:]+\s*(?:AM|PM))/gi;
+      let dayRangeMatch;
+      while ((dayRangeMatch = dayRangePattern.exec(hoursText)) !== null) {
+        const startDay = dayRangeMatch[1];
+        const endDay = dayRangeMatch[2];
+        const hours = dayRangeMatch[3];
+        
+        // Convert day names to numbers
+        let startDayNum = -1;
+        for (const [day, num] of Object.entries(daysMap)) {
+          if (day.toLowerCase() === startDay.toLowerCase() || 
+              day.substring(0, 3).toLowerCase() === startDay.toLowerCase()) {
+            startDayNum = num;
             break;
           }
         }
+        
+        // If endDay is specified, check if current day is within the range
+        if (endDay) {
+          let endDayNum = -1;
+          for (const [day, num] of Object.entries(daysMap)) {
+            if (day.toLowerCase() === endDay.toLowerCase() || 
+                day.substring(0, 3).toLowerCase() === endDay.toLowerCase()) {
+              endDayNum = num;
+              break;
+            }
+          }
+          
+          // Handle week wraparound
+          if (endDayNum < startDayNum) {
+            endDayNum += 7;
+          }
+          
+          // Check if current day is within range
+          let adjustedDayOfWeek = dayOfWeek;
+          if (adjustedDayOfWeek < startDayNum) {
+            adjustedDayOfWeek += 7;
+          }
+          
+          if (startDayNum <= adjustedDayOfWeek && adjustedDayOfWeek <= endDayNum) {
+            todayHours = hours;
+            break;
+          }
+        } else if (startDayNum === dayOfWeek) {
+          // Single day match
+          todayHours = hours;
+          break;
+        }
       }
       
-      // Check for day exclusions (e.g., "except Friday")
-      if (hoursText.includes('except')) {
+      // If no day range match, look for specific day
+      if (!todayHours) {
         for (const [day, dayNum] of Object.entries(daysMap)) {
-          if (dayOfWeek === dayNum && hoursText.toLowerCase().includes(`except ${day.toLowerCase()}`)) {
-            // This day is excluded, check if there's a separate time range
-            const dayPattern = new RegExp(`except[^,]+${day}[^\\d]+(\\d+(?::\\d+)?\\s*(?:AM|PM)[^\\d]+\\d+(?::\\d+)?\\s*(?:AM|PM))`, 'i');
+          if (dayOfWeek === dayNum) {
+            // Look for patterns like "Monday: 9am-5pm" or "Monday 9am-5pm"
+            const dayPattern = new RegExp(`${day}\\s*(?::|-)\\s*(\\d+(?::\\d+)?\\s*(?:AM|PM)[^,;]*?\\d+(?::\\d+)?\\s*(?:AM|PM))`, 'i');
             const match = hoursText.match(dayPattern);
+            
             if (match) {
               todayHours = match[1];
               break;
-            } else {
-              // If no specific hours for excluded day, assume closed
-              return false;
+            }
+            
+            // Try abbreviated day names
+            const shortDay = day.substring(0, 3);
+            const shortDayPattern = new RegExp(`${shortDay}\\s*(?::|-)\\s*(\\d+(?::\\d+)?\\s*(?:AM|PM)[^,;]*?\\d+(?::\\d+)?\\s*(?:AM|PM))`, 'i');
+            const shortMatch = hoursText.match(shortDayPattern);
+            
+            if (shortMatch) {
+              todayHours = shortMatch[1];
+              break;
             }
           }
         }
       }
       
-      // Check for "closed Monday", etc.
+      // Check for exceptions like "except Friday" or "closed Monday"
       for (const [day, dayNum] of Object.entries(daysMap)) {
-        if (dayOfWeek === dayNum && hoursText.toLowerCase().includes(`closed ${day.toLowerCase()}`)) {
+        if (dayOfWeek === dayNum) {
+          // Check for "closed XXX"
+          if (hoursText.toLowerCase().includes(`closed ${day.toLowerCase()}`)) {
+            return false;
+          }
+          
+          // Check for exceptions like "except Friday 12:30 PM - 1 AM"
+          if (hoursText.toLowerCase().includes(`except ${day.toLowerCase()}`)) {
+            const exceptionPattern = new RegExp(`except[^,]*${day}[^\\d]+(\\d+(?::\\d+)?\\s*(?:AM|PM)[^\\d]+\\d+(?::\\d+)?\\s*(?:AM|PM))`, 'i');
+            const match = hoursText.match(exceptionPattern);
+            
+            if (match) {
+              todayHours = match[1];
+              break;
+            }
+          }
+        }
+      }
+      
+      // If no specific hours found for today, use the default hours
+      if (!todayHours) {
+        // Try to extract the default hours (pattern without day specificity)
+        const defaultHoursPattern = /(\d+(?::\d+)?\s*(?:AM|PM)\s*-\s*\d+(?::\d+)?\s*(?:AM|PM))/i;
+        const defaultMatch = hoursText.match(defaultHoursPattern);
+        
+        if (defaultMatch) {
+          todayHours = defaultMatch[1];
+        } else {
+          // No parseable hours found
           return false;
         }
       }
@@ -3353,24 +3423,42 @@
       return isWithinTimeRange(todayHours, currentTime);
     }
     
+    // Helper function to determine if the current time is within a specific time range
     function isWithinTimeRange(timeRangeStr, currentTime) {
       // Extract opening and closing times
-      const timePattern = /(\d+(?::\d+)?\s*(?:AM|PM))\s*-\s*(\d+(?::\d+)?\s*(?:AM|PM))/i;
+      const timePattern = /(\d+(?::\d+)?\s*(?:AM|PM))\s*(?:-|to|–)\s*(\d+(?::\d+)?\s*(?:AM|PM))/i;
       const match = timeRangeStr.match(timePattern);
       
-      if (!match) return false; // Can't parse hours format
+      if (!match) return false; // Can't parse the time format
       
       const openingStr = match[1];
       const closingStr = match[2];
       
-      // Convert times to 24-hour decimal format
+      // Parse the time strings to 24-hour decimal format
       function parseTime(timeStr) {
-        const [time, meridiem] = timeStr.split(/\s+/);
+        // Normalize the time string to handle different formats
+        const normalized = timeStr.trim().toUpperCase();
+        let [time, meridiem] = ["", ""];
+        
+        if (normalized.includes("AM")) {
+          [time, meridiem] = normalized.split("AM");
+          meridiem = "AM";
+        } else if (normalized.includes("PM")) {
+          [time, meridiem] = normalized.split("PM");
+          meridiem = "PM";
+        } else {
+          // No AM/PM specified, assume standard business hours
+          time = normalized;
+          meridiem = parseInt(time) < 12 ? "AM" : "PM";
+        }
+        
+        time = time.trim();
         let [hours, minutes = 0] = time.split(':').map(Number);
         
-        if (meridiem.toLowerCase() === 'pm' && hours < 12) {
+        // Convert to 24-hour format
+        if (meridiem === "PM" && hours < 12) {
           hours += 12;
-        } else if (meridiem.toLowerCase() === 'am' && hours === 12) {
+        } else if (meridiem === "AM" && hours === 12) {
           hours = 0;
         }
         
@@ -3388,8 +3476,10 @@
       // Check if current time is within opening hours
       if (openingTime <= currentTime && currentTime < closingTime) {
         return true;
-      } else if (closingTime > 24 && currentTime < (closingTime - 24)) {
-        // Handle after-midnight current time
+      }
+      
+      // Handle the case where the current time is after midnight but still within business hours
+      if (closingTime > 24 && (currentTime < (closingTime - 24) || currentTime >= openingTime)) {
         return true;
       }
       
@@ -3473,7 +3563,7 @@
       });
       card.appendChild(favoriteBtn);
       
-      // Add open status for venues (not events)
+      // Add open status for venues (not events) - positioned on the right
       if (item.type !== 'event') {
         const isOpen = isOpenNow(item);
         const openStatus = document.createElement('div');
@@ -4344,80 +4434,5 @@
       });
     }
   </script>
-  <script>
-    function isPlaceOpen(hoursStr) {
-      if (!hoursStr) return false;
-  
-      const now = new Date();
-      const day = now.getDay(); // 0 = Sunday
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-  
-      const timeStr = `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
-      const currentTime = parseInt(hours + '' + (minutes < 10 ? '0' + minutes : minutes));
-  
-      // Handle split hours like "7 AM - 11:30 AM, 12:30 PM - 2 AM"
-      const parts = hoursStr.split(',').map(part => part.trim());
-  
-      for (let part of parts) {
-        let [from, to] = part.split(' - ');
-        if (!to) continue;
-  
-        const from24 = convertTo24(from.trim());
-        const to24 = convertTo24(to.trim());
-  
-        const fromTime = parseInt(from24.replace(':', ''));
-        const toTime = parseInt(to24.replace(':', ''));
-  
-        // Handle closing after midnight (e.g., 7 PM - 2 AM)
-        if (toTime < fromTime) {
-          if (currentTime >= fromTime || currentTime < toTime) {
-            return true;
-          }
-        } else {
-          if (currentTime >= fromTime && currentTime < toTime) {
-            return true;
-          }
-        }
-      }
-  
-      return false;
-    }
-  
-    function convertTo24(timeStr) {
-      const [time, modifier] = timeStr.toUpperCase().split(' ');
-      let [hours, minutes] = time.split(':');
-      hours = parseInt(hours);
-      minutes = minutes || '00';
-  
-      if (modifier === 'PM' && hours !== 12) {
-        hours += 12;
-      } else if (modifier === 'AM' && hours === 12) {
-        hours = 0;
-      }
-  
-      return `${hours}:${minutes}`;
-    }
-  
-    function updateOpenStatusCards() {
-      document.querySelectorAll('.card').forEach(card => {
-        const hoursText = card.querySelector('.card-table td:nth-child(2)')?.innerText || '';
-        const isOpen = isPlaceOpen(hoursText);
-  
-        let badge = card.querySelector('.open-status');
-        if (!badge) {
-          badge = document.createElement('div');
-          badge.className = 'open-status';
-          card.appendChild(badge);
-        }
-  
-        badge.textContent = isOpen ? 'Open Now' : 'Closed';
-        badge.classList.toggle('open', isOpen);
-        badge.classList.toggle('closed', !isOpen);
-      });
-    }
-  
-    window.addEventListener('DOMContentLoaded', updateOpenStatusCards);
-  </script>  
 </body>
 </html>
